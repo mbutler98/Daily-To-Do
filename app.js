@@ -156,6 +156,26 @@ const WALL_KEYS = Object.keys(WALL);
 function autoWall() { const h = new Date().getHours(); return h < 5 ? "tahoe-night" : h < 9 ? "tahoe-dawn" : h < 17 ? "tahoe-day" : h < 20 ? "tahoe-dusk" : "tahoe-night"; }
 const wallKey = (k) => (k === "auto" || !WALL[k] ? autoWall() : k);
 function wallStyle(k, small = true) { const key = wallKey(k); return `background-image:url(img/${key}${small ? "-sm" : ""}.webp);--wc:${WALL[key][1]}`; }
+// Pictures live in their own layer. When a page redraws, the layer that's already on screen is moved into
+// the new page instead of being rebuilt, so iOS never repaints (and flashes) a wallpaper it was already showing.
+const IMG_KEEP = new Map(); // holding decoded images stops Safari from dropping them between redraws
+function keepImg(url) { if (!IMG_KEEP.has(url)) { const im = new Image(); im.decoding = "async"; im.src = url; IMG_KEEP.set(url, im); } }
+function takeLayers(...roots) {
+  const m = new Map();
+  roots.forEach((r) => r && $$(".wimg", r).forEach((n) => { const k = n.dataset.src; (m.get(k) || m.set(k, []).get(k)).push(n); }));
+  return m;
+}
+function giveLayers(old, ...roots) {
+  roots.forEach((r) => r && $$(".wall", r).forEach((el) => {
+    const bg = el.style.backgroundImage; if (!bg || bg === "none") return;
+    const url = bg.replace(/^url\(["']?|["']?\)$/g, ""); keepImg(url);
+    el.style.backgroundImage = "none";
+    const reuse = (old.get(url) || []).shift();
+    if (reuse) el.prepend(reuse);
+    else { const i = document.createElement("i"); i.className = "wimg"; i.dataset.src = url; i.style.backgroundImage = `url("${url}")`; el.prepend(i); }
+  }));
+}
+const syncClock = () => document.documentElement.style.setProperty("--kb", `-${((performance.now() / 1000) % 64).toFixed(2)}s`); // slow drifts carry on where they were
 
 // ================= storage =================
 const KEY = "dtd.v2";
@@ -573,7 +593,13 @@ window.addEventListener("hashchange", () => {
   const a = prev.name === "day" && S.route.name === "day" ? (S.route.day > prev.day ? "push" : S.route.day < prev.day ? "pop" : "fade-in")
     : DEPTH[S.route.name] > DEPTH[prev.name] ? "push" : DEPTH[S.route.name] < DEPTH[prev.name] ? "pop"
     : ti(S.route.name) !== ti(prev.name) ? (ti(S.route.name) > ti(prev.name) ? "tab-r" : "tab-l") : "fade-in";
-  closeAllSheets(); closeMenu(); render(a); window.scrollTo(0, 0);
+  closeAllSheets(); closeMenu();
+  const show = (x) => { render(x); window.scrollTo(0, 0); };
+  if (document.startViewTransition && !reduceMotion.matches && a !== "fade-in") { // a real cross-slide between pages where the browser can do it
+    const root = document.documentElement; root.dataset.vt = a;
+    try { const vt = document.startViewTransition(() => show("enter")); vt.finished.finally(() => { if (root.dataset.vt === a) delete root.dataset.vt; }); }
+    catch { delete root.dataset.vt; show(a); }
+  } else show(a);
 });
 function applyTheme() {
   const t = (D && D.profile.theme) || "auto";
@@ -585,7 +611,8 @@ darkMQ.addEventListener("change", applyTheme);
 
 // ================= render =================
 function render(anim = "fade-in") {
-  applyTheme();
+  applyTheme(); syncClock();
+  const layers = takeLayers(appEl, $("#sidebar"));
   if (!D) { $("#sidebar").innerHTML = ""; renderWelcome(); return; }
   const r = S.route;
   if (r.name === "day") renderDay(r.day, anim);
@@ -597,6 +624,7 @@ function render(anim = "fade-in") {
   else if (r.name === "habits") renderHabits(anim);
   else renderLists(anim);
   renderSidebar();
+  giveLayers(layers, appEl, $("#sidebar"));
   animateRings(appEl); S.pop = null;
 }
 function tabbar() {
@@ -752,7 +780,7 @@ function renderDay(day, anim) {
   bindSuggest(day); swipeHero($("#hero"), nav);
 }
 function suggestCard(day, sug) {
-  return `<div class="suggest fade-in"><p>${g("sparkles", "s")}${esc(sug.length > 1 ? `It's ${weekdayName(day)}. Which plan?` : `Your ${weekdayName(day)} template`)}</p><div class="choices">${sug.map((s) =>
+  return `<div class="suggest"><p>${g("sparkles", "s")}${esc(sug.length > 1 ? `It's ${weekdayName(day)}. Which plan?` : `Your ${weekdayName(day)} template`)}</p><div class="choices">${sug.map((s) =>
     `<button type="button" class="tcard wall" style="${wallStyle(s.image)}" data-apply="${s.id}">${lic(s.icon, s.color)}<b>${esc(s.name)}</b><small>${plural(s.items.length, "item")} · tap to add</small></button>`).join("")}</div></div>`;
 }
 function bindSuggest(day) {
@@ -833,7 +861,7 @@ const habitsLeft = (day) => habitsFor(day).filter((h) => !hMet(h, day) && !h.ski
 function habitStrip(day) {
   if (day > today()) return "";
   const hs = habitsFor(day);
-  if (!hs.length) return D.habits.length || day !== today() ? "" : `<button type="button" class="hpromo fade-in" id="hPromo">${lic("target", "#ff2d55")}<span class="grow"><b>Track a habit</b><small>Gym, reading, coding, meals, chores: one tap a day.</small></span>${g("chevR", "chev")}</button>`;
+  if (!hs.length) return D.habits.length || day !== today() ? "" : `<button type="button" class="hpromo" id="hPromo">${lic("target", "#ff2d55")}<span class="grow"><b>Track a habit</b><small>Gym, reading, coding, meals, chores: one tap a day.</small></span>${g("chevR", "chev")}</button>`;
   const done = hs.filter((h) => hMet(h, day)).length;
   return `<div class="sh sm hhead"><h2>Habits · ${done} of ${hs.length}</h2><button type="button" data-go="#/habits">See All</button></div>
     <div class="hstrip stagger">${hs.map((h) => `<button type="button" class="hchip" data-h="${h.id}" data-d="${day}" aria-label="${esc(h.name)}: ${hVal(h, day)} of ${h.target}">${hRing(h, day, 60)}<b>${esc(h.name)}</b><small>${h.skip[day] ? "Skipped" : isCheckH(h) ? (hMet(h, day) ? "Done" : esc(schedText(h))) : `${hVal(h, day)}/${h.target}${isAmountH(h) ? " " + esc(h.unit) : ""}`}</small></button>`).join("")}</div>`;
@@ -892,7 +920,7 @@ function bindHabits(root = appEl) {
   $$("[data-hopen]", root).forEach((b) => b.onclick = () => { const h = habitById(b.dataset.hopen); h && habitSheet(h, today()); });
   $("#hPromo", root) && ($("#hPromo", root).onclick = () => go("#/habits"));
 }
-function heatmap(h, sel) {
+function heatmap(h, sel, enter) {
   const t = today(), start = addDays(weekStart(t), -7 * 19), cells = [];
   for (let i = 0; i < 140; i++) {
     const d = addDays(start, i), f = hFrac(h, d), pct = f >= 1 ? 100 : f > 0 ? Math.round(30 + f * 50) : 0;
@@ -900,10 +928,10 @@ function heatmap(h, sel) {
     cells.push(`<button type="button" class="${cls}" data-day="${d}" style="--col:${Math.floor(i / 7)}${pct ? `;background:color-mix(in srgb, ${h.color} ${pct}%, var(--fill))` : ""}" ${d > t ? "disabled" : ""} aria-label="${esc(shortDate(d))}${hVal(h, d) ? `: ${hVal(h, d)}` : ""}"></button>`);
   }
   const months = []; for (let c = 0; c < 20; c++) { const d = addDays(start, c * 7); const p = parseDay(d); months.push(p.getDate() <= 7 ? p.toLocaleDateString("en-CA", { month: "short" }) : ""); }
-  return `<div class="heatwrap"><div class="months">${months.map((m) => `<span>${m}</span>`).join("")}</div><div class="heat">${cells.join("")}</div></div>`;
+  return `<div class="heatwrap"><div class="months">${months.map((m) => `<span>${m}</span>`).join("")}</div><div class="heat ${enter ? "enter" : ""}">${cells.join("")}</div></div>`;
 }
 function habitSheet(h, day) {
-  let sel = !day || day > today() ? today() : day;
+  let sel = !day || day > today() ? today() : day, first = true;
   const draw = () => {
     const v = hVal(h, sel), wk = h.sched.type === "weekly", st = hStreak(h);
     return `<div class="hhero" style="--c:${h.color}"><button type="button" class="hbtn" data-h="${h.id}" data-d="${today()}" aria-label="Log today">${hRing(h, today(), 72)}</button>
@@ -911,7 +939,7 @@ function habitSheet(h, day) {
       <div class="group"><div class="statrow four"><div><b>${st}</b><span>${wk ? "week" : "day"} streak</span></div><div><b>${hBest(h)}</b><span>best</span></div><div><b data-countto="${hStrength(h)}" data-from="0" data-suffix="%">0%</b><span>strength</span></div><div><b>${hTotal(h)}</b><span>days done</span></div></div></div>
       <p class="foot">Strength rises each time you check in and eases down after a miss, so one off day doesn't wipe out your progress.</p>
       <div class="sh sm"><h2>Last 20 weeks</h2></div>
-      <div class="group" style="--c:${h.color}">${heatmap(h, sel)}</div>
+      <div class="group" style="--c:${h.color}">${heatmap(h, sel, first)}</div>
       <div class="sh sm"><h2>${esc(relDay(sel) || shortDate(sel))}</h2></div>
       <div class="group ic">
         ${isCheckH(h) ? `<label class="cell tap"><span class="lic sq" style="--c:${h.color}">${g("check")}</span><span class="grow">Done</span><span class="switch"><input type="checkbox" id="hsDone" ${hMet(h, sel) ? "checked" : ""}><span></span></span></label>`
@@ -941,7 +969,7 @@ function habitSheet(h, day) {
       D.habits = D.habits.filter((x) => x !== h); save(); sheet.close(0, true); render(""); toast(`Deleted ${h.name}`);
     } }] });
   };
-  sheet.refresh = refresh;
+  sheet.refresh = refresh; first = false;
   bind(); animateRings(sheet.el);
 }
 function editHabit(src, onDone) {

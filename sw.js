@@ -1,7 +1,7 @@
 /* Offline support: the app works without a connection once it has been opened.
    Pages and code: network first (so updates show up), falling back to the saved copy.
    Pictures: saved the first time they're shown, then served from the device. */
-const VERSION = "dtd-v4-0";
+const VERSION = "dtd-v4-1";
 const SHELL = ["./", "index.html", "app.css", "app.js", "manifest.webmanifest", "icons/icon-192.png", "icons/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
