@@ -611,7 +611,7 @@ darkMQ.addEventListener("change", applyTheme);
 
 // ================= render =================
 function render(anim = "fade-in") {
-  applyTheme(); syncClock();
+  applyTheme();
   const layers = takeLayers(appEl, $("#sidebar"));
   if (!D) { $("#sidebar").innerHTML = ""; renderWelcome(); return; }
   const r = S.route;
@@ -663,7 +663,7 @@ function countUp(el, from, to, suffix = "") {
 }
 function heroParallax() { // the picture drifts a little slower than the page
   const hero = $(".hero", appEl); if (!hero || reduceMotion.matches) return;
-  const set = () => { const y = Math.min(window.scrollY, 400); hero.style.setProperty("--py", `${(y * 0.28).toFixed(1)}px`); hero.style.setProperty("--pfade", String(Math.max(0, 1 - y / 320).toFixed(3))); };
+  const set = () => { const y = Math.min(window.scrollY, 300); hero.style.setProperty("--py", `${(y * 0.18).toFixed(1)}px`); };
   set(); return set;
 }
 const initials = (n) => (n || "?").trim().split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
