@@ -122,11 +122,18 @@ const G = {
   tabLists: '<rect x="3" y="3.5" width="18" height="17" rx="4.5"/><path d="M10 9h7.5M10 15h7.5" stroke-width="2"/><circle cx="6.8" cy="9" r="1.3" fill="currentColor" stroke="none"/><circle cx="6.8" cy="15" r="1.3" fill="currentColor" stroke="none"/>',
   tabTpl: '<rect x="6" y="7" width="14.5" height="14" rx="3" fill="currentColor" stroke="none"/><path d="M3.5 16V6.5a3 3 0 013-3h9.5"/>',
   tabSearch: '<circle cx="10.5" cy="10.5" r="6.3" stroke-width="2.2"/><path d="M15.3 15.3l5 5" stroke-width="2.6"/>',
+  tabHabits: '<circle cx="12" cy="12" r="8.8" stroke-width="2" opacity=".35"/><path d="M12 3.2a8.8 8.8 0 11-8.3 5.9" stroke-width="2.6"/><circle cx="12" cy="12" r="3.3" fill="currentColor" stroke="none"/>',
+  code: '<path d="M8.5 7L3.5 12l5 5M15.5 7l5 5-5 5M13.6 4.5l-3.2 15"/>',
+  drop: '<path d="M12 3.5s6 6.4 6 11a6 6 0 01-12 0c0-4.6 6-11 6-11z"/>',
+  target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
+  skip: '<path d="M5 6l7 6-7 6zM13 6l7 6-7 6z"/>',
+  archive: '<rect x="3.5" y="4" width="17" height="4.5" rx="1.5"/><path d="M5 8.5v9.5a2 2 0 002 2h10a2 2 0 002-2V8.5M10 12.5h4"/>',
+  minus: '<path d="M5 12h14" stroke-width="2"/>',
 };
 function g(name, cls = "") {
   return `<svg class="g ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${G[name] || G.list}</svg>`;
 }
-const LIST_GLYPHS = ["list", "checklist", "cart", "bag", "house", "building", "briefcase", "star", "heart", "book", "cap", "gift", "plane", "car", "tent", "dumbbell", "leaf", "tree", "paw", "baby", "music", "film", "game", "cup", "fork", "pill", "bandage", "wrench", "money", "flag", "sun", "moon", "bolt", "sparkles", "calendar", "bulb"];
+const LIST_GLYPHS = ["list", "checklist", "cart", "bag", "house", "building", "briefcase", "star", "heart", "book", "cap", "gift", "plane", "car", "tent", "dumbbell", "leaf", "tree", "paw", "baby", "music", "film", "game", "cup", "fork", "pill", "bandage", "wrench", "money", "flag", "sun", "moon", "bolt", "sparkles", "calendar", "bulb", "code", "drop", "target"];
 const COLORS = ["#ff3b30", "#ff9500", "#ffcc00", "#34c759", "#00c7be", "#32ade6", "#007aff", "#5856d6", "#af52de", "#ff2d55", "#a2845e", "#8e8e93"];
 const lic = (icon, color, cls = "") => `<span class="lic ${cls}" style="--c:${color || COLORS[6]}">${g(icon || "list")}</span>`;
 const licSm = (icon, color, px = 22) => `<span class="lic" style="--c:${color || COLORS[6]};width:${px}px;height:${px}px">${g(icon || "list", "xs")}</span>`;
@@ -164,30 +171,14 @@ function save() { if (!D) return; D.updated = new Date().toISOString(); clearTim
 window.addEventListener("pagehide", () => { if (D) { clearTimeout(saveTimer); Store.write(PID, D); } });
 
 function blankData(name) {
-  return { v: 3, profile: { name, created: new Date().toISOString(), theme: "auto", todayImage: "auto", showDone: true, homeView: "cards" }, lists: [], items: [], templates: [], applied: [], rules: [], updated: null };
+  return { v: 3, profile: { name, created: new Date().toISOString(), theme: "auto", todayImage: "auto", showDone: true, homeView: "cards" }, lists: [], items: [], templates: [], applied: [], rules: [], habits: [], updated: null };
 }
 function newList(f) { return { id: uid(), name: "", icon: "list", color: COLORS[6], image: "sonoma-light", sort: "manual", group: "none", qty: false, showDone: true, pos: (D ? D.lists.length : 0) + 1, ...f }; }
-function seed(d) {
-  const L = (f) => { const l = { ...newList(f), pos: d.lists.length + 1 }; d.lists.push(l); return l; };
-  const groceries = L({ name: "Groceries", icon: "cart", color: "#34c759", image: "sonoma-light", qty: true, group: "section" });
-  L({ name: "Weekend", icon: "house", color: "#ff9500", image: "big-sur-color-day" });
-  L({ name: "Work", icon: "briefcase", color: "#007aff", image: "sequoia-dark" });
-  let pos = 1;
-  [["Milk", 1, "Dairy"], ["Eggs", 1, "Dairy"], ["Bananas", 6, "Produce"], ["Avocados", 2, "Produce"], ["Bread", 1, "Bakery"], ["Coffee", 1, "Pantry"]]
-    .forEach(([t, q, s]) => d.items.push({ id: uid(), list: groceries.id, title: t, qty: q > 1 ? q : undefined, section: s, notes: "", time: "", starred: false, done: false, pos: pos++, created: Date.now() }));
-  d.templates.push(
-    { id: uid(), name: "Saturday in Toronto", icon: "building", color: "#007aff", image: "golden-gate-bridge", target: "day", days: [5],
-      items: [{ title: "Squash", time: "10:00" }, { title: "Groceries" }, { title: "Laundry" }, { title: "Clean room" }] },
-    { id: uid(), name: "Saturday in Barrie", icon: "tree", color: "#34c759", image: "sequoia-forest", target: "day", days: [5],
-      items: [{ title: "Raking garden" }, { title: "Drying" }, { title: "Lunch" }, { title: "Dinner" }] },
-    { id: uid(), name: "Weekly staples", icon: "bag", color: "#ff9500", image: "sonoma-horizon", target: groceries.id, days: [],
-      items: [{ title: "Milk", section: "Dairy" }, { title: "Eggs", section: "Dairy" }, { title: "Bread", section: "Bakery" }, { title: "Bananas", qty: 6, section: "Produce" }, { title: "Yogurt", qty: 2, section: "Dairy" }] },
-  );
-}
 const EMOJI_GLYPH = { "🛒": "cart", "🥦": "leaf", "🏠": "house", "🏡": "house", "🏙️": "building", "🌲": "tree", "💼": "briefcase", "🏋️": "dumbbell", "🎾": "dumbbell", "📚": "book", "💻": "briefcase", "✈️": "plane", "🎁": "gift", "🎉": "sparkles", "💊": "pill", "🐶": "paw", "🚗": "car", "💡": "bulb", "🎬": "film", "❤️": "heart", "☀️": "sun", "🌙": "moon", "🥛": "bag", "✅": "checklist" };
 function migrate(d) { // older saves → today's shape
   if (!d) return d;
-  d.rules = d.rules || []; d.applied = d.applied || [];
+  d.rules = d.rules || []; d.applied = d.applied || []; d.habits = d.habits || [];
+  d.habits.forEach((h) => { h.log = h.log || {}; h.skip = h.skip || {}; h.sched = h.sched || { type: "daily" }; h.target = h.target || 1; h.tod = h.tod || "any"; });
   d.profile = { theme: "auto", todayImage: "auto", showDone: true, homeView: "cards", ...d.profile };
   d.lists.forEach((l, i) => {
     if (!l.icon) l.icon = EMOJI_GLYPH[l.emoji] || "list";
@@ -320,7 +311,148 @@ function runRules() {
 }
 
 // streaks
-function doneDays() { const s = new Set(); D.items.forEach((i) => { if (i.done && i.doneAt) s.add(dayStr(new Date(i.doneAt))); }); return s; }
+function doneDays() {
+  const s = new Set(); D.items.forEach((i) => { if (i.done && i.doneAt) s.add(dayStr(new Date(i.doneAt))); });
+  (D.habits || []).forEach((h) => Object.keys(h.log).forEach((d) => { if (hMet(h, d)) s.add(d); }));
+  return s;
+}
+
+// ================= habits =================
+// Built on what the best trackers share: one-tap rings (Streaks), done / count / amount goals (Habitify),
+// every day, chosen days or N times a week (Loop), skips that don't break a streak (Way of Life),
+// a strength score that forgives a missed day (Loop) and a year-at-a-glance grid (HabitKit).
+const TOD = { any: "Any Time", morning: "Morning", afternoon: "Afternoon", evening: "Evening" };
+const TOD_ORDER = ["morning", "afternoon", "evening", "any"];
+const UNITS = ["times", "pages", "min", "glasses", "km", "steps", "reps", "hours"];
+const HABIT_PRESETS = [
+  { name: "Gym", icon: "dumbbell", color: "#ff3b30", target: 1, unit: "", sched: { type: "weekly", times: 4 }, tod: "morning" },
+  { name: "Read", icon: "book", color: "#ff9500", target: 20, unit: "pages", sched: { type: "daily" }, tod: "evening" },
+  { name: "Code", icon: "code", color: "#5856d6", target: 30, unit: "min", sched: { type: "days", days: [0, 1, 2, 3, 4] }, tod: "any" },
+  { name: "Eat 3 meals", icon: "fork", color: "#34c759", target: 3, unit: "times", sched: { type: "daily" }, tod: "any" },
+  { name: "Chores", icon: "house", color: "#00c7be", target: 1, unit: "", sched: { type: "daily" }, tod: "evening" },
+  { name: "Drink water", icon: "drop", color: "#32ade6", target: 8, unit: "glasses", sched: { type: "daily" }, tod: "any" },
+  { name: "Meditate", icon: "leaf", color: "#af52de", target: 10, unit: "min", sched: { type: "daily" }, tod: "morning" },
+  { name: "Lights out by 11", icon: "moon", color: "#007aff", target: 1, unit: "", sched: { type: "daily" }, tod: "evening" },
+];
+const habitById = (id) => (D.habits || []).find((h) => h.id === id);
+const hVal = (h, d) => h.log[d] || 0;
+const hMet = (h, d) => hVal(h, d) >= (h.target || 1);
+const hFrac = (h, d) => Math.min(1, hVal(h, d) / (h.target || 1));
+const isCheckH = (h) => (h.target || 1) === 1 && (!h.unit || h.unit === "times");
+const isAmountH = (h) => !!h.unit && h.unit !== "times";
+const weekStart = (d) => addDays(d, -monIndex(d));
+const unitText = (h, n) => (!h.unit || h.unit === "times" ? (n === 1 ? "time" : "times") : h.unit);
+const activeHabits = () => (D.habits || []).filter((h) => !h.archived).sort((a, b) => (a.pos || 0) - (b.pos || 0));
+function weekDone(h, d) { const s = weekStart(d); let n = 0; for (let i = 0; i < 7; i++) if (hMet(h, addDays(s, i))) n++; return n; }
+function scheduledOn(h, d) { if (d < h.created) return false; return h.sched.type === "days" ? (h.sched.days || []).includes(monIndex(d)) : true; }
+function habitDueOn(h, d) { // shows on that day's rings
+  if (h.archived || !scheduledOn(h, d)) return false;
+  if (h.sched.type === "weekly") return hVal(h, d) > 0 || weekDone(h, d) < h.sched.times;
+  return true;
+}
+function schedText(h) {
+  const s = h.sched;
+  if (s.type === "weekly") return s.times >= 7 ? "Every day" : `${s.times}× a week`;
+  if (s.type === "days") return daysText(s.days);
+  return "Every day";
+}
+const goalText = (h) => (isCheckH(h) ? "" : `${h.target} ${unitText(h, h.target)}`);
+function hStreak(h) {
+  const t = today();
+  if (h.sched.type === "weekly") {
+    let ws = weekStart(t), n = 0;
+    if (weekDone(h, ws) >= h.sched.times) n++;
+    ws = addDays(ws, -7);
+    for (let k = 0; k < 520 && ws >= weekStart(h.created) && weekDone(h, ws) >= h.sched.times; k++) { n++; ws = addDays(ws, -7); }
+    return n;
+  }
+  let d = t, n = 0;
+  if (!hMet(h, d)) d = addDays(d, -1); // today isn't over yet
+  for (let k = 0; k < 3660 && d >= h.created; k++) {
+    if (hMet(h, d)) n++;
+    else if (scheduledOn(h, d) && !h.skip[d]) break;
+    d = addDays(d, -1);
+  }
+  return n;
+}
+function hBest(h) {
+  const t = today(); let best = 0, run = 0;
+  if (h.sched.type === "weekly") {
+    for (let ws = weekStart(h.created); ws <= t; ws = addDays(ws, 7)) { if (weekDone(h, ws) >= h.sched.times) best = Math.max(best, ++run); else if (ws !== weekStart(t)) run = 0; }
+    return best;
+  }
+  for (let d = h.created; d <= t; d = addDays(d, 1)) {
+    if (hMet(h, d)) best = Math.max(best, ++run);
+    else if (scheduledOn(h, d) && !h.skip[d] && d !== t) run = 0;
+  }
+  return best;
+}
+function hStrength(h) { // 0–100, rises with each check-in, eases down after a miss
+  const t = today(); let s = 0;
+  if (h.sched.type === "weekly") {
+    const a = 1 - Math.pow(0.5, 1 / 4);
+    for (let ws = weekStart(h.created); ws <= t; ws = addDays(ws, 7)) {
+      const f = Math.min(1, weekDone(h, ws) / h.sched.times);
+      if (ws === weekStart(t) && f < 1) continue;
+      s = s * (1 - a) + a * f;
+    }
+  } else {
+    const a = 1 - Math.pow(0.5, 1 / 13);
+    for (let d = h.created; d <= t; d = addDays(d, 1)) {
+      if (!scheduledOn(h, d) || h.skip[d] || (d === t && !hMet(h, d))) continue;
+      s = s * (1 - a) + a * hFrac(h, d);
+    }
+  }
+  return Math.round(s * 100);
+}
+const hTotal = (h) => Object.keys(h.log).filter((d) => hMet(h, d)).length;
+function newHabit(f = {}) { return { id: uid(), name: "", icon: "target", color: COLORS[5], target: 1, unit: "", sched: { type: "daily" }, tod: "any", created: weekStart(today()), log: {}, skip: {}, pos: (D.habits.length || 0) + 1, ...JSON.parse(JSON.stringify(f)) }; }
+function setHabit(h, d, v, { quiet = false } = {}) {
+  const before = hVal(h, d), wasMet = hMet(h, d), old = { v: before, skip: h.skip[d] };
+  v = Math.max(0, Math.min(9999, Math.round(v * 100) / 100));
+  if (v) h.log[d] = v; else delete h.log[d];
+  if (v) delete h.skip[d];
+  save();
+  const nowMet = hMet(h, d);
+  if (nowMet && !wasMet) {
+    S.pop = `h:${h.id}:${d}`; haptic([10, 30, 14]);
+    const due = activeHabits().filter((x) => habitDueOn(x, d) || hVal(x, d) > 0);
+    if (due.length > 1 && due.every((x) => hMet(x, d)) && d === today()) setTimeout(confetti, 260);
+  } else haptic(8);
+  afterHabit();
+  if (quiet) return;
+  const st = hStreak(h), unit = h.sched.type === "weekly" ? "week" : "day";
+  const msg = nowMet && !wasMet ? `${h.name}: done${st > 1 ? ` · ${st}-${unit} streak` : ""}` : isCheckH(h) ? `${h.name}: not done` : `${h.name}: ${v} of ${h.target} ${unitText(h, h.target)}`;
+  toast(msg, { label: "Undo", fn: () => { if (old.v) h.log[d] = old.v; else delete h.log[d]; if (old.skip) h.skip[d] = true; save(); afterHabit(); } });
+}
+function afterHabit() { const p = S.pop; render(""); S.pop = p; openSheets.forEach((s) => s.refresh && s.refresh()); S.pop = null; }
+function nudgeHabit(h, d, anchor) { // what one tap on a ring does
+  if (d > today()) { toast("You can't log a day that hasn't happened yet."); return; }
+  if (isCheckH(h)) { setHabit(h, d, hMet(h, d) ? 0 : 1); return; }
+  if (!isAmountH(h)) { setHabit(h, d, hVal(h, d) + 1); return; }
+  const v = hVal(h, d), steps = [...new Set([Math.round(h.target / 4), Math.round(h.target / 2), h.target].filter((x) => x > 0))];
+  menu(anchor, [
+    ...steps.map((x) => ({ label: `+${x} ${h.unit}`, icon: "plus", fn: () => setHabit(h, d, v + x) })),
+    ...(v < h.target ? [{ label: "Log the Full Goal", icon: "check", fn: () => setHabit(h, d, h.target) }] : []),
+    { sep: true },
+    { label: "Details", icon: "target", fn: () => habitSheet(h, d) },
+    ...(v ? [{ label: "Reset to 0", icon: "x", red: true, fn: () => setHabit(h, d, 0) }] : []),
+  ], `${h.name} · ${v} of ${h.target} ${h.unit}`);
+}
+function toggleSkip(h, d) {
+  if (h.skip[d]) delete h.skip[d]; else { h.skip[d] = true; delete h.log[d]; }
+  save(); afterHabit(); haptic(6);
+  toast(h.skip[d] ? `${h.name}: skipped, your streak is safe` : `${h.name}: skip removed`);
+}
+// a ring that grows from where it last was
+function hRing(h, d, size = 56) {
+  const f = hFrac(h, d), met = f >= 1, key = `h:${h.id}:${d}`;
+  const r = size / 2 - 4, C = 2 * Math.PI * r, from = S.rings[key] ?? 0;
+  const burst = S.pop === key ? "burst" : "";
+  return `<span class="hring ${met ? "met" : ""} ${h.skip[d] ? "skipped" : ""} ${burst}" style="--c:${h.color};width:${size}px;height:${size}px">
+    <svg viewBox="0 0 ${size} ${size}"><circle class="t" cx="${size / 2}" cy="${size / 2}" r="${r}"/><circle class="p" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - from)}" data-k="${key}" data-f="${f}" data-c="${C}"/></svg>
+    <span class="ic">${g(h.skip[d] ? "skip" : h.icon)}</span><i class="sparks"></i></span>`;
+}
 function streak() {
   const s = doneDays(); let d = today(), n = 0;
   if (!s.has(d)) d = addDays(d, -1);
@@ -422,21 +554,25 @@ function tracker() {
 }
 
 // ================= routing =================
-const S = { route: { name: "lists" }, editing: false, newIds: new Set(), q: "" };
+const S = { route: { name: "lists" }, editing: false, newIds: new Set(), q: "", rings: {}, pop: null, tab: null };
 const appEl = $("#app");
 function parseHash() {
   const h = location.hash.replace(/^#\/?/, "").split("/");
   if (h[0] === "day") return { name: "day", day: validDay(h[1]) ? h[1] : today() };
   if (h[0] === "today") return { name: "day", day: today() };
   if (h[0] === "list" && h[1]) return { name: "list", id: h[1] };
-  if (["starred", "planned", "all", "templates", "settings", "search"].includes(h[0])) return { name: h[0] };
+  if (["starred", "planned", "all", "templates", "settings", "search", "habits"].includes(h[0])) return { name: h[0] };
   return { name: "lists" };
 }
-const DEPTH = { lists: 0, templates: 0, search: 0, day: 0, settings: 1, list: 1, starred: 1, planned: 1, all: 1 };
+const DEPTH = { lists: 0, templates: 0, search: 0, day: 0, habits: 0, settings: 1, list: 1, starred: 1, planned: 1, all: 1 };
 function go(hash, replace = false) { if (location.hash === hash) { render(""); return; } replace ? location.replace(hash) : (location.hash = hash); }
 window.addEventListener("hashchange", () => {
   const prev = S.route; S.route = parseHash(); S.editing = false;
-  const a = DEPTH[S.route.name] > DEPTH[prev.name] ? "push" : DEPTH[S.route.name] < DEPTH[prev.name] ? "pop" : "fade-in";
+  const TABS = ["day", "habits", "lists", "templates", "search"];
+  const ti = (n) => TABS.indexOf(n === "day" || n === "habits" || n === "templates" || n === "search" ? n : "lists");
+  const a = prev.name === "day" && S.route.name === "day" ? (S.route.day > prev.day ? "push" : S.route.day < prev.day ? "pop" : "fade-in")
+    : DEPTH[S.route.name] > DEPTH[prev.name] ? "push" : DEPTH[S.route.name] < DEPTH[prev.name] ? "pop"
+    : ti(S.route.name) !== ti(prev.name) ? (ti(S.route.name) > ti(prev.name) ? "tab-r" : "tab-l") : "fade-in";
   closeAllSheets(); closeMenu(); render(a); window.scrollTo(0, 0);
 });
 function applyTheme() {
@@ -458,25 +594,49 @@ function render(anim = "fade-in") {
   else if (r.name === "templates") renderTemplates(anim);
   else if (r.name === "settings") renderSettings(anim);
   else if (r.name === "search") renderSearch(anim);
+  else if (r.name === "habits") renderHabits(anim);
   else renderLists(anim);
   renderSidebar();
+  animateRings(appEl); S.pop = null;
 }
 function tabbar() {
   const n = S.route.name;
-  const cur = n === "day" ? "day" : n === "templates" ? "templates" : n === "search" ? "search" : "lists";
-  const b = (id, href, icon, label) => `<button type="button" data-go="${href}" class="${cur === id ? "on" : ""}" aria-current="${cur === id ? "page" : "false"}">${g(icon)}<span>${label}</span></button>`;
-  return `<nav class="tabbar" aria-label="Tabs">${b("day", "#/today", "tabDay", "My Day")}${b("lists", "#/", "tabLists", "Lists")}${b("templates", "#/templates", "tabTpl", "Templates")}${b("search", "#/search", "tabSearch", "Search")}</nav>`;
+  const cur = ["day", "habits", "templates", "search"].includes(n) ? n : "lists";
+  const bounce = S.tab && S.tab !== cur; S.tab = cur;
+  const b = (id, href, icon, label) => `<button type="button" data-go="${href}" class="${cur === id ? "on" : ""} ${cur === id && bounce ? "bounce" : ""}" aria-current="${cur === id ? "page" : "false"}">${g(icon)}<span>${label}</span></button>`;
+  return `<nav class="tabbar" aria-label="Tabs">${b("day", "#/today", "tabDay", "My Day")}${b("habits", "#/habits", "tabHabits", "Habits")}${b("lists", "#/", "tabLists", "Lists")}${b("templates", "#/templates", "tabTpl", "Templates")}${b("search", "#/search", "tabSearch", "Search")}</nav>`;
 }
 function bindCommon() {
   $$("[data-go]", appEl).forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); const h = b.dataset.go; go(h === "#/today" ? `#/day/${today()}` : h); }));
-  const nav = $(".navbar");
-  window.onscroll = nav ? () => nav.classList.toggle("scrolled", window.scrollY > 20) : null;
+  const nav = $(".navbar"), par = heroParallax();
+  window.onscroll = () => { if (nav) nav.classList.toggle("scrolled", window.scrollY > 20); if (par) par(); };
   if (nav) nav.classList.toggle("scrolled", window.scrollY > 20);
 }
 const counts = (items) => { const open = items.filter((i) => !i.done).length; return { open, done: items.length - open, total: items.length }; };
-function ringSvg(done, total) {
-  const r = 21, C = 2 * Math.PI * r, f = total ? done / total : 0;
-  return `<div class="ring" role="img" aria-label="${done} of ${total} done"><svg viewBox="0 0 52 52"><circle class="t" cx="26" cy="26" r="${r}"/><circle class="p" cx="26" cy="26" r="${r}" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - f)}"/></svg><span>${Math.round(f * 100)}%</span></div>`;
+function ringSvg(done, total, key = "ring") {
+  const r = 21, C = 2 * Math.PI * r, f = total ? done / total : 0, from = S.rings[key] ?? 0;
+  return `<div class="ring" role="img" aria-label="${done} of ${total} done"><svg viewBox="0 0 52 52"><circle class="t" cx="26" cy="26" r="${r}"/><circle class="p" cx="26" cy="26" r="${r}" stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - from)}" data-k="${key}" data-f="${f}" data-c="${C}"/></svg><span data-countto="${Math.round(f * 100)}" data-from="${Math.round(from * 100)}" data-suffix="%">${Math.round(from * 100)}%</span></div>`;
+}
+// ---------- motion helpers ----------
+function animateRings(root = document) { // rings and numbers ease from their last value to the new one
+  const els = $$("circle[data-k]", root);
+  els.forEach((c) => { S.rings[c.dataset.k] = +c.dataset.f; });
+  const go2 = () => {
+    els.forEach((c) => { c.style.strokeDashoffset = String(+c.dataset.c * (1 - +c.dataset.f)); });
+    $$("[data-countto]", root).forEach((el) => countUp(el, +el.dataset.from || 0, +el.dataset.countto, el.dataset.suffix || ""));
+  };
+  reduceMotion.matches ? go2() : requestAnimationFrame(() => requestAnimationFrame(go2));
+}
+function countUp(el, from, to, suffix = "") {
+  if (from === to || reduceMotion.matches) { el.textContent = to + suffix; return; }
+  const t0 = performance.now(), dur = 650;
+  const step = (t) => { const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(from + (to - from) * e) + suffix; if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+function heroParallax() { // the picture drifts a little slower than the page
+  const hero = $(".hero", appEl); if (!hero || reduceMotion.matches) return;
+  const set = () => { const y = Math.min(window.scrollY, 400); hero.style.setProperty("--py", `${(y * 0.28).toFixed(1)}px`); hero.style.setProperty("--pfade", String(Math.max(0, 1 - y / 320).toFixed(3))); };
+  set(); return set;
 }
 const initials = (n) => (n || "?").trim().split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 const avatar = (cls = "", style = "") => `<span class="avatar wall ${cls}" style="${wallStyle(D.profile.todayImage)};${style}">${esc(initials(D.profile.name))}</span>`;
@@ -502,6 +662,7 @@ function renderSidebar() {
   const sm = (k, href, active) => `<button class="sb-item ${on(active)}" data-go="${href}">${lic(SMART[k].icon, SMART[k].color)}${SMART[k].name}<span class="n">${smartCount(k) || ""}</span></button>`;
   sb.innerHTML = `<button class="sb-head" data-go="#/settings" style="text-align:left">${avatar()}<div><b>${esc(D.profile.name)}</b><small>${esc(weekdayName(t))}, ${esc(longDate(t))}</small></div></button>
     ${sm("day", "#/today", r.name === "day" && r.day === t)}${sm("starred", "#/starred", r.name === "starred")}${sm("planned", "#/planned", r.name === "planned")}${sm("all", "#/all", r.name === "all")}
+    <button class="sb-item ${on(r.name === "habits")}" data-go="#/habits">${lic("target", "#ff2d55")}Habits<span class="n">${habitsLeft(t) || ""}</span></button>
     <button class="sb-item ${on(r.name === "search")}" data-go="#/search">${lic("search", "#8e8e93")}Search</button>
     <div class="sb-sep"></div><div class="sb-label">My Lists</div>
     ${D.lists.map((l) => `<button class="sb-item ${on(r.name === "list" && r.id === l.id)}" data-go="#/list/${l.id}">${lic(l.icon, l.color)}${esc(l.name)}<span class="n">${counts(listItems(l.id)).open || ""}</span></button>`).join("")}
@@ -523,7 +684,7 @@ function listCard(l) {
 }
 function renderLists(anim) {
   const view = D.profile.homeView || "cards";
-  const tile = (k, href) => `<button type="button" class="tile" data-go="${href}">${lic(SMART[k].icon, SMART[k].color, "md")}<span class="n">${smartCount(k)}</span><span class="l">${SMART[k].name}</span></button>`;
+  const tile = (k, href) => { const n = smartCount(k); return `<button type="button" class="tile" data-go="${href}">${lic(SMART[k].icon, SMART[k].color, "md")}<span class="n" ${anim && n ? `data-countto="${n}" data-from="0"` : ""}>${anim && n ? 0 : n}</span><span class="l">${SMART[k].name}</span></button>`; };
   appEl.innerHTML = `<div class="page nobar ${anim}">
     <div class="navbar"><div class="side"></div><div class="mid">Lists</div><div class="side r">
       <button type="button" class="nb" id="viewBtn" aria-label="${view === "cards" ? "Show as rows" : "Show as cards"}">${g(view === "cards" ? "rows" : "grid")}</button>
@@ -558,12 +719,13 @@ function renderDay(day, anim) {
     <div class="navbar"><div class="side">${day !== t ? `<button type="button" class="nb" id="goToday">${g("chevL")}Today</button>` : ""}</div><div class="mid">${esc(rel || weekdayName(day))}</div>
       <div class="side r">${items.length ? `<button type="button" class="nb ${S.editing ? "b" : ""}" id="edit">${S.editing ? "Done" : "Edit"}</button>` : ""}<button type="button" class="nb" id="more" aria-label="More">${g("more")}</button></div></div>
     <div class="hero wall" style="${wallStyle(D.profile.todayImage, false)}" id="hero">
-      <div class="top"><div class="gbtns"><span class="gpill glass">${g("sun", "s")} My Day</span>${st >= 1 ? `<span class="gpill glass" title="Days in a row with something done">${g("flame", "s")} ${st}</span>` : ""}</div>
+      <div class="top"><div class="gbtns"><span class="gpill glass">${g("sun", "s")} My Day</span>${st >= 1 ? `<span class="gpill glass flame" title="Days in a row with something done">${g("flame", "s")} ${st}</span>` : ""}</div>
         <div class="gbtns"><button type="button" class="gbtn glass" id="prev" aria-label="Previous day">${g("chevL")}</button><button type="button" class="gbtn glass" id="next" aria-label="Next day">${g("chevR")}</button></div></div>
-      <div class="bot"><label class="datepick"><h1>${esc(weekdayName(day))}</h1><div class="sub">${esc(longDate(day))}${rel ? ` <span class="gpill glass">${rel}</span>` : ""}</div><input type="date" id="pick" value="${day}" aria-label="Pick a date"></label>${c.total ? ringSvg(c.done, c.total) : ""}</div>
+      <div class="bot"><label class="datepick"><h1>${esc(weekdayName(day))}</h1><div class="sub">${esc(longDate(day))}${rel ? ` <span class="gpill glass">${rel}</span>` : ""}</div><input type="date" id="pick" value="${day}" aria-label="Pick a date"></label>${c.total ? ringSvg(c.done, c.total, `day:${day}`) : ""}</div>
     </div>
     ${applied.length ? `<div class="chips">${applied.map((a) => { const tp = tplById(a.tpl); return `<span class="chip">${licSm(tp ? tp.icon : "stack", tp ? tp.color : "#8e8e93", 20)}${esc(a.name)}<button type="button" class="x" data-unapply="${a.id}" aria-label="Remove ${esc(a.name)}">${g("x")}</button></span>`; }).join("")}</div>` : ""}
     ${sug.length ? suggestCard(day, sug) : ""}
+    ${S.editing ? "" : habitStrip(day)}
     ${late.length ? `<div class="gh late">${g("clock", "s")} Earlier <span class="c">${late.length}</span><span style="flex:1"></span><button type="button" class="nb" id="carry" style="font-weight:600;font-size:15px;min-height:30px">Move to Today</button></div><div class="tasks">${late.map((i) => taskRow(i, { src: true })).join("")}</div>` : ""}
     ${(late.length || due.length) && open.length ? `<div class="gh">${esc(rel || weekdayName(day))} <span class="c">${open.length}</span></div>` : ""}
     <div class="tasks ${S.editing ? "editing" : ""}" style="${late.length || due.length ? "" : "margin-top:14px"}">${open.map((i) => taskRow(i, { src: i.list !== "day" })).join("")}</div>
@@ -573,7 +735,7 @@ function renderDay(day, anim) {
     ${doneSection(done, D.profile.showDone !== false)}
   </div>
   ${S.editing ? "" : `<div class="addbar"><button type="button" class="addbtn" id="add">${g("plus")} Add a Task</button></div>`}${tabbar()}`;
-  S.newIds.clear(); bindCommon(); bindDone(); bindRows();
+  S.newIds.clear(); bindCommon(); bindDone(); bindRows(); bindHabits();
   const nav = (n) => go(`#/day/${addDays(day, n)}`);
   $("#prev").onclick = () => nav(-1); $("#next").onclick = () => nav(1);
   $("#goToday") && ($("#goToday").onclick = () => go(`#/day/${t}`));
@@ -665,6 +827,182 @@ function suggestionsSheet(day) {
   });
 }
 
+// ================= Habits =================
+const habitsFor = (day) => activeHabits().filter((h) => habitDueOn(h, day) || hVal(h, day) > 0 || h.skip[day]);
+const habitsLeft = (day) => habitsFor(day).filter((h) => !hMet(h, day) && !h.skip[day]).length;
+function habitStrip(day) {
+  if (day > today()) return "";
+  const hs = habitsFor(day);
+  if (!hs.length) return D.habits.length || day !== today() ? "" : `<button type="button" class="hpromo fade-in" id="hPromo">${lic("target", "#ff2d55")}<span class="grow"><b>Track a habit</b><small>Gym, reading, coding, meals, chores: one tap a day.</small></span>${g("chevR", "chev")}</button>`;
+  const done = hs.filter((h) => hMet(h, day)).length;
+  return `<div class="sh sm hhead"><h2>Habits · ${done} of ${hs.length}</h2><button type="button" data-go="#/habits">See All</button></div>
+    <div class="hstrip stagger">${hs.map((h) => `<button type="button" class="hchip" data-h="${h.id}" data-d="${day}" aria-label="${esc(h.name)}: ${hVal(h, day)} of ${h.target}">${hRing(h, day, 60)}<b>${esc(h.name)}</b><small>${h.skip[day] ? "Skipped" : isCheckH(h) ? (hMet(h, day) ? "Done" : esc(schedText(h))) : `${hVal(h, day)}/${h.target}${isAmountH(h) ? " " + esc(h.unit) : ""}`}</small></button>`).join("")}</div>`;
+}
+function habitRow(h, week) {
+  const t = today(), st = hStreak(h), wk = h.sched.type === "weekly";
+  const meta = [];
+  if (st) meta.push(`<span class="hot">${g("flame", "xs")} ${st} ${wk ? (st === 1 ? "week" : "weeks") : st === 1 ? "day" : "days"}</span>`);
+  if (!isCheckH(h)) meta.push(`<span>${hVal(h, t)} / ${h.target} ${esc(unitText(h, h.target))}</span>`);
+  meta.push(`<span>${wk ? `${weekDone(h, t)} of ${h.sched.times} this week` : esc(schedText(h))}</span>`);
+  return `<div class="hrow ${S.newIds.has(h.id) ? "row-in" : ""}" style="--c:${h.color}">
+    <button type="button" class="hbtn" data-h="${h.id}" data-d="${t}" aria-label="Log ${esc(h.name)}">${hRing(h, t, 52)}</button>
+    <button type="button" class="hbody" data-hopen="${h.id}"><b>${esc(h.name)}</b><div class="meta">${meta.join("")}</div></button>
+    <div class="hweek">${week.map((d) => {
+      const f = hFrac(h, d), cls = [d > t ? "fut" : "", d === t ? "now" : "", hMet(h, d) ? "met" : "", h.skip[d] ? "sk" : "", !scheduledOn(h, d) && d <= t ? "off" : ""].join(" ");
+      return `<button type="button" class="wd ${cls}" data-h="${h.id}" data-d="${d}" style="--f:${f}" ${d > t || d < h.created ? "disabled" : ""} aria-label="${esc(weekdayName(d))}"><span>${DAY_LETTERS[monIndex(d)]}</span><i>${hMet(h, d) ? g("check") : ""}</i></button>`;
+    }).join("")}</div></div>`;
+}
+function renderHabits(anim) {
+  const t = today(), hs = activeHabits(), due = habitsFor(t), done = due.filter((h) => hMet(h, t)).length;
+  const week = Array.from({ length: 7 }, (_, i) => addDays(weekStart(t), i));
+  const best = hs.reduce((m, h) => Math.max(m, hStreak(h)), 0);
+  const groups = TOD_ORDER.map((k) => [k, hs.filter((h) => (h.tod || "any") === k)]).filter(([, a]) => a.length);
+  const archived = (D.habits || []).filter((h) => h.archived);
+  const img = D.profile.habitsImage || "aurora";
+  appEl.innerHTML = `<div class="page nobar ${anim}">
+    <div class="navbar"><div class="side"></div><div class="mid">Habits</div><div class="side r"><button type="button" class="nb" id="newHabit" aria-label="New habit">${g("plus")}</button></div></div>
+    <div class="hero wall" style="${wallStyle(img, false)}">
+      <div class="top"><div class="gbtns"><span class="gpill glass">${g("target", "s")} Habits</span>${best ? `<span class="gpill glass flame">${g("flame", "s")} ${best}</span>` : ""}</div>
+        <button type="button" class="gbtn glass" id="hTheme" aria-label="Change theme">${g("photo")}</button></div>
+      <div class="bot"><div><h1>${hs.length ? (due.length && done === due.length ? "All done" : "Today") : "Habits"}</h1><div class="sub">${hs.length ? (due.length ? `${done} of ${plural(due.length, "habit")} done · ${esc(weekdayName(t))}` : "Nothing due today. Enjoy it.") : "Small things, every day"}</div></div>${due.length ? ringSvg(done, due.length, "habits") : ""}</div>
+    </div>
+    ${hs.length ? groups.map(([k, a]) => `<div class="gh">${esc(TOD[k])} <span class="c">${a.length}</span></div><div class="habits stagger">${a.map((h) => habitRow(h, week)).join("")}</div>`).join("")
+      : `<div class="empty">${lic("target", "#ff2d55")}<b>Build a habit</b>Pick one to start. You can change the goal and days.</div>`}
+    ${hs.length ? `<p class="foot">Tap a ring to log it, or a day to fill it in later. Press and hold for details, skips and history.</p>` : ""}
+    <div class="sh sm"><h2>${hs.length ? "Add another" : "Popular habits"}</h2></div>
+    <div class="presets stagger">${HABIT_PRESETS.filter((p) => !hs.some((h) => h.name === p.name)).map((p) => `<button type="button" data-preset="${HABIT_PRESETS.indexOf(p)}">${licSm(p.icon, p.color, 26)}<span><b>${esc(p.name)}</b><small>${esc(schedText(p))}${goalText(p) ? " · " + esc(goalText(p)) : ""}</small></span></button>`).join("")}
+      <button type="button" data-preset="-1">${licSm("plus", "#8e8e93", 26)}<span><b>Your own</b><small>Anything you want to repeat</small></span></button></div>
+    ${archived.length ? `<button type="button" class="disc ${S.showArch ? "" : "closed"}" id="toggleArch">${g("chevD")} Archived <span class="c">${archived.length}</span></button>
+      ${S.showArch ? `<div class="group ic">${archived.map((h) => `<button type="button" class="cell" data-hopen="${h.id}">${lic(h.icon, h.color)}<span class="grow">${esc(h.name)}</span>${g("chevR", "chev")}</button>`).join("")}</div>` : ""}` : ""}
+  </div>${tabbar()}`;
+  S.newIds.clear(); bindCommon(); bindHabits();
+  $("#newHabit").onclick = () => editHabit(null);
+  $("#hTheme").onclick = () => pickImage(img, (k) => { D.profile.habitsImage = k; save(); render(""); });
+  $$("[data-preset]").forEach((b) => b.onclick = () => editHabit(+b.dataset.preset >= 0 ? HABIT_PRESETS[+b.dataset.preset] : null));
+  $("#toggleArch") && ($("#toggleArch").onclick = () => { S.showArch = !S.showArch; render(""); });
+}
+function bindHabits(root = appEl) {
+  $$("[data-h]", root).forEach((b) => {
+    let timer, long = false;
+    b.addEventListener("pointerdown", () => { long = false; clearTimeout(timer); timer = setTimeout(() => { long = true; haptic(14); const h = habitById(b.dataset.h); h && habitSheet(h, b.dataset.d); }, 480); });
+    ["pointerup", "pointerleave", "pointercancel"].forEach((ev) => b.addEventListener(ev, () => clearTimeout(timer)));
+    b.addEventListener("contextmenu", (e) => e.preventDefault());
+    b.addEventListener("click", () => { if (long) { long = false; return; } const h = habitById(b.dataset.h); h && nudgeHabit(h, b.dataset.d, b); });
+  });
+  $$("[data-hopen]", root).forEach((b) => b.onclick = () => { const h = habitById(b.dataset.hopen); h && habitSheet(h, today()); });
+  $("#hPromo", root) && ($("#hPromo", root).onclick = () => go("#/habits"));
+}
+function heatmap(h, sel) {
+  const t = today(), start = addDays(weekStart(t), -7 * 19), cells = [];
+  for (let i = 0; i < 140; i++) {
+    const d = addDays(start, i), f = hFrac(h, d), pct = f >= 1 ? 100 : f > 0 ? Math.round(30 + f * 50) : 0;
+    const cls = [d > t ? "fut" : "", d < h.created ? "pre" : "", d === t ? "now" : "", d === sel ? "sel" : "", h.skip[d] ? "sk" : ""].join(" ");
+    cells.push(`<button type="button" class="${cls}" data-day="${d}" style="--col:${Math.floor(i / 7)}${pct ? `;background:color-mix(in srgb, ${h.color} ${pct}%, var(--fill))` : ""}" ${d > t ? "disabled" : ""} aria-label="${esc(shortDate(d))}${hVal(h, d) ? `: ${hVal(h, d)}` : ""}"></button>`);
+  }
+  const months = []; for (let c = 0; c < 20; c++) { const d = addDays(start, c * 7); const p = parseDay(d); months.push(p.getDate() <= 7 ? p.toLocaleDateString("en-CA", { month: "short" }) : ""); }
+  return `<div class="heatwrap"><div class="months">${months.map((m) => `<span>${m}</span>`).join("")}</div><div class="heat">${cells.join("")}</div></div>`;
+}
+function habitSheet(h, day) {
+  let sel = !day || day > today() ? today() : day;
+  const draw = () => {
+    const v = hVal(h, sel), wk = h.sched.type === "weekly", st = hStreak(h);
+    return `<div class="hhero" style="--c:${h.color}"><button type="button" class="hbtn" data-h="${h.id}" data-d="${today()}" aria-label="Log today">${hRing(h, today(), 72)}</button>
+        <div><b>${esc(h.name)}</b><small>${esc(schedText(h))}${goalText(h) ? ` · ${esc(goalText(h))}` : ""} · ${esc(TOD[h.tod || "any"])}</small></div></div>
+      <div class="group"><div class="statrow four"><div><b>${st}</b><span>${wk ? "week" : "day"} streak</span></div><div><b>${hBest(h)}</b><span>best</span></div><div><b data-countto="${hStrength(h)}" data-from="0" data-suffix="%">0%</b><span>strength</span></div><div><b>${hTotal(h)}</b><span>days done</span></div></div></div>
+      <p class="foot">Strength rises each time you check in and eases down after a miss, so one off day doesn't wipe out your progress.</p>
+      <div class="sh sm"><h2>Last 20 weeks</h2></div>
+      <div class="group" style="--c:${h.color}">${heatmap(h, sel)}</div>
+      <div class="sh sm"><h2>${esc(relDay(sel) || shortDate(sel))}</h2></div>
+      <div class="group ic">
+        ${isCheckH(h) ? `<label class="cell tap"><span class="lic sq" style="--c:${h.color}">${g("check")}</span><span class="grow">Done</span><span class="switch"><input type="checkbox" id="hsDone" ${hMet(h, sel) ? "checked" : ""}><span></span></span></label>`
+          : `<div class="cell"><span class="lic sq" style="--c:${h.color}">${g(h.icon)}</span><span class="grow">${esc(cap(unitText(h, 2)))}<div class="sub">Goal: ${h.target}</div></span><span class="stepper"><button type="button" id="hsM" aria-label="Less">−</button><i></i><span id="hsV">${v}</span><i></i><button type="button" id="hsP" aria-label="More">+</button></span></div>`}
+        <label class="cell tap"><span class="lic sq" style="--c:#8e8e93">${g("skip")}</span><span class="grow">Skip this day<div class="sub">A rest day: your streak stays safe</div></span><span class="switch"><input type="checkbox" id="hsSkip" ${h.skip[sel] ? "checked" : ""}><span></span></span></label>
+      </div>
+      <div class="group" style="margin-top:22px">
+        <button type="button" class="cell" id="hsEdit"><span class="grow blue">Edit Habit</span><span class="blue">${g("pencil", "s")}</span></button>
+        <button type="button" class="cell" id="hsArch"><span class="grow blue">${h.archived ? "Restore" : "Archive"}</span><span class="blue">${g("archive", "s")}</span></button>
+        <button type="button" class="cell red" id="hsDel"><span class="grow">Delete Habit</span>${g("trash", "s")}</button></div>
+      <p class="foot">Started ${esc(longDate(h.created))}.</p>`;
+  };
+  const sheet = openSheet({ title: h.name, right: { label: "Done", bold: true }, html: draw() });
+  const refresh = () => { if (!habitById(h.id)) return; const sc = $(".scroll", sheet.el), top = sc.scrollTop; sc.innerHTML = draw(); sc.scrollTop = top; $("h3", sheet.el).textContent = h.name; bind(); animateRings(sheet.el); };
+  const bind = () => {
+    const el = sheet.el;
+    bindHabits(el);
+    $$(".heat [data-day]", el).forEach((b) => b.onclick = () => { sel = b.dataset.day; haptic(4); refresh(); });
+    const step = h.target >= 20 ? 5 : 1;
+    $("#hsDone", el) && ($("#hsDone", el).onchange = (e) => setHabit(h, sel, e.target.checked ? 1 : 0, { quiet: true }));
+    $("#hsM", el) && ($("#hsM", el).onclick = () => setHabit(h, sel, Math.max(0, hVal(h, sel) - step), { quiet: true }));
+    $("#hsP", el) && ($("#hsP", el).onclick = () => setHabit(h, sel, hVal(h, sel) + step, { quiet: true }));
+    $("#hsSkip", el).onchange = () => toggleSkip(h, sel);
+    $("#hsEdit", el).onclick = () => editHabit(h, refresh);
+    $("#hsArch", el).onclick = () => { h.archived = !h.archived; save(); sheet.close(0, true); render(""); toast(h.archived ? `${h.name} archived. Its history is kept.` : `${h.name} is back`); };
+    $("#hsDel", el).onclick = () => actionSheet({ title: `Delete “${h.name}” and all its history? Archive it instead to keep the history.`, actions: [{ label: "Delete Habit", red: true, fn: () => {
+      D.habits = D.habits.filter((x) => x !== h); save(); sheet.close(0, true); render(""); toast(`Deleted ${h.name}`);
+    } }] });
+  };
+  sheet.refresh = refresh;
+  bind(); animateRings(sheet.el);
+}
+function editHabit(src, onDone) {
+  const isNew = !src || !src.id;
+  const d = isNew ? newHabit(src ? { name: src.name, icon: src.icon, color: src.color, target: src.target, unit: src.unit, sched: src.sched, tod: src.tod } : {}) : JSON.parse(JSON.stringify(src));
+  d.sched.days = d.sched.days || [monIndex(today())]; d.sched.times = d.sched.times || 3;
+  const draw = () => `<div class="hprev" style="--c:${d.color}"><span class="hring met" style="--c:${d.color};width:58px;height:58px"><span class="ic">${g(d.icon)}</span></span>
+      <div><b id="hpName">${esc(d.name || "New Habit")}</b><small id="hpSub">${esc(schedText(d))}${goalText(d) ? " · " + esc(goalText(d)) : ""}</small></div></div>
+    ${isNew ? `<div class="presets mini">${HABIT_PRESETS.map((p, i) => `<button type="button" data-preset="${i}" class="${p.name === d.name ? "on" : ""}">${licSm(p.icon, p.color, 22)}<b>${esc(p.name)}</b></button>`).join("")}</div>` : ""}
+    <div class="group"><div class="cell"><input id="hName" class="bigtitle" value="${esc(d.name)}" placeholder="Habit name, like Read" maxlength="40" aria-label="Habit name" style="text-align:center"></div></div>
+    <div class="group"><div class="colors" role="radiogroup" aria-label="Colour">${COLORS.map((c) => `<button type="button" data-color="${c}" class="${c === d.color ? "on" : ""}" style="--sw:${c}" aria-label="Colour"></button>`).join("")}</div></div>
+    <div class="group"><div class="glyphs" role="radiogroup" aria-label="Icon" style="--c:${d.color}">${LIST_GLYPHS.map((k) => `<button type="button" data-icon="${k}" class="${k === d.icon ? "on" : ""}" aria-label="${k}">${g(k)}</button>`).join("")}</div></div>
+    <div class="sh sm"><h2>Goal each day</h2></div>
+    <div class="group ic">
+      <div class="cell"><span class="lic sq" style="--c:${d.color}">${g("target")}</span><span class="grow">Amount</span><span class="stepper"><button type="button" id="gM" aria-label="Less">−</button><i></i><span id="gV">${d.target}</span><i></i><button type="button" id="gP" aria-label="More">+</button></span></div>
+      <label class="cell tap"><span class="lic sq" style="--c:#8e8e93">${g("number")}</span><span class="grow">Unit</span><input class="pillin" id="hUnit" list="hUnits" value="${esc(d.unit || "times")}" style="width:120px" maxlength="16"><datalist id="hUnits">${UNITS.map((u) => `<option value="${u}">`).join("")}</datalist></label>
+    </div>
+    <p class="foot">${isCheckH(d) ? "1 time: one tap marks it done." : isAmountH(d) ? `Tap the ring to add ${esc(d.unit)}, or log the whole goal at once.` : "Each tap on the ring adds one."}</p>
+    <div class="sh sm"><h2>How often</h2></div>
+    <div class="group"><div class="cell" style="padding:10px 12px"><div class="seg">${[["daily", "Every Day"], ["days", "On Days"], ["weekly", "Per Week"]].map(([k, v]) => `<button type="button" data-st="${k}" class="${d.sched.type === k ? "on" : ""}">${v}</button>`).join("")}</div></div>
+      ${d.sched.type === "days" ? `<div class="days">${DAY_LETTERS.map((x, i) => `<button type="button" data-day="${i}" class="${d.sched.days.includes(i) ? "on" : ""}" aria-pressed="${d.sched.days.includes(i)}" aria-label="${DAY_LONG[i]}" style="${d.sched.days.includes(i) ? `background:${d.color}` : ""}">${x}</button>`).join("")}</div>` : ""}
+      ${d.sched.type === "weekly" ? `<div class="cell"><span class="grow">Times a week<div class="sub">Any days you like</div></span><span class="stepper"><button type="button" id="wM" aria-label="Fewer">−</button><i></i><span id="wV">${d.sched.times}</span><i></i><button type="button" id="wP" aria-label="More">+</button></span></div>` : ""}</div>
+    <div class="sh sm"><h2>Time of day</h2></div>
+    <div class="group"><div class="cell" style="padding:10px 12px"><div class="seg">${["morning", "afternoon", "evening", "any"].map((k) => `<button type="button" data-tod="${k}" class="${(d.tod || "any") === k ? "on" : ""}">${k === "any" ? "Any" : TOD[k]}</button>`).join("")}</div></div></div>
+    ${isNew ? "" : `<div class="group" style="margin-top:22px"><button type="button" class="cell red" id="hDel"><span class="grow">Delete Habit</span>${g("trash", "s")}</button></div>`}`;
+  const sheet = openSheet({
+    title: isNew ? "New Habit" : "Edit Habit", left: { label: "Cancel" },
+    right: { label: isNew ? "Add" : "Done", bold: true, fn: () => {
+      d.name = $("#hName", sheet.el).value.trim();
+      if (!d.name) { toast("Give the habit a name."); $("#hName", sheet.el).focus(); return false; }
+      if (d.sched.type === "days" && !d.sched.days.length) { toast("Pick at least one day."); return false; }
+      d.unit = d.unit === "times" ? "" : d.unit;
+      if (isNew) { D.habits.push(d); S.newIds.add(d.id); } else Object.assign(src, d, { log: src.log, skip: src.skip });
+      save(); if (isNew && S.route.name !== "habits" && S.route.name !== "day") go("#/habits"); else render("");
+      onDone && onDone(); toast(isNew ? `${d.name} added. Tap its ring when you've done it.` : "Habit saved");
+    } },
+    html: draw(),
+  });
+  const el = sheet.el;
+  const sub = () => { $("#hpSub", el).textContent = `${schedText(d)}${goalText(d) ? " · " + goalText(d) : ""}`; };
+  const redraw = () => { const sc = $(".scroll", el), top = sc.scrollTop; sc.innerHTML = draw(); sc.scrollTop = top; bind(); };
+  const bind = () => {
+    $("#hName", el).oninput = (e) => { d.name = e.target.value; $("#hpName", el).textContent = e.target.value.trim() || "New Habit"; };
+    $("#hUnit", el).oninput = (e) => { d.unit = e.target.value.trim(); sub(); };
+    $("#hUnit", el).onchange = () => redraw();
+    $$("[data-preset]", el).forEach((b) => b.onclick = () => { const p = HABIT_PRESETS[+b.dataset.preset]; Object.assign(d, JSON.parse(JSON.stringify(p))); d.sched.days = d.sched.days || [monIndex(today())]; d.sched.times = d.sched.times || 3; haptic(6); redraw(); });
+    $$("[data-color]", el).forEach((b) => b.onclick = () => { d.color = b.dataset.color; haptic(4); redraw(); });
+    $$("[data-icon]", el).forEach((b) => b.onclick = () => { d.icon = b.dataset.icon; haptic(4); redraw(); });
+    const tstep = (dir) => { const s = d.target >= 20 ? 5 : 1; d.target = Math.max(1, Math.min(9999, d.target + dir * s)); if (d.target > 1 && !d.unit) d.unit = "times"; haptic(4); redraw(); };
+    $("#gM", el).onclick = () => tstep(-1); $("#gP", el).onclick = () => tstep(1);
+    $$("[data-st]", el).forEach((b) => b.onclick = () => { d.sched.type = b.dataset.st; haptic(4); redraw(); });
+    $$("[data-day]", el).forEach((b) => b.onclick = () => { const i = +b.dataset.day; d.sched.days = d.sched.days.includes(i) ? d.sched.days.filter((x) => x !== i) : [...d.sched.days, i].sort(); haptic(4); redraw(); });
+    $("#wM", el) && ($("#wM", el).onclick = () => { d.sched.times = Math.max(1, d.sched.times - 1); redraw(); });
+    $("#wP", el) && ($("#wP", el).onclick = () => { d.sched.times = Math.min(7, d.sched.times + 1); redraw(); });
+    $$("[data-tod]", el).forEach((b) => b.onclick = () => { d.tod = b.dataset.tod; haptic(4); redraw(); });
+    $("#hDel", el) && ($("#hDel", el).onclick = () => actionSheet({ title: `Delete “${src.name}” and all its history?`, actions: [{ label: "Delete Habit", red: true, fn: () => { D.habits = D.habits.filter((x) => x !== src); save(); closeAllSheets(); render(""); } }] }));
+  };
+  bind();
+  if (isNew && !d.name) setTimeout(() => { const n = $("#hName", el); n && n.focus(); }, reduceMotion.matches ? 0 : 340);
+}
+
 // ================= a list =================
 const SORTS = { manual: "Manual", starred: "Importance", due: "Due Date", alpha: "Alphabetically", created: "Creation Date" };
 const GROUPS = { none: "None", section: "Sections", due: "Due Date" };
@@ -698,7 +1036,7 @@ function renderList(l, anim) {
     <div class="hero wall" style="${wallStyle(l.image, false)}">
       <div class="top"><div class="gbtns">${lic(l.icon, l.color)}${rules.length ? `<button type="button" class="gpill glass" id="rulesPill">${g("repeat", "s")} ${esc(ruleWhen(rules[0]))}${rules.length > 1 ? ` +${rules.length - 1}` : ""}</button>` : ""}</div>
         <button type="button" class="gbtn glass" id="theme" aria-label="Change theme">${g("photo")}</button></div>
-      <div class="bot"><div><h1>${esc(l.name)}</h1><div class="sub">${c.total ? `${c.open} to go · ${c.done} done` : "Nothing here yet"}</div></div>${c.total ? ringSvg(c.done, c.total) : ""}</div>
+      <div class="bot"><div><h1>${esc(l.name)}</h1><div class="sub">${c.total ? `${c.open} to go · ${c.done} done` : "Nothing here yet"}</div></div>${c.total ? ringSvg(c.done, c.total, `list:${l.id}`) : ""}</div>
     </div>
     ${applied.length ? `<div class="chips">${applied.map((a) => `<span class="chip">${g("stack", "s")} ${esc(a.name)}<button type="button" class="x" data-unapply="${a.id}" aria-label="Remove ${esc(a.name)}">${g("x")}</button></span>`).join("")}</div>` : ""}
     <div style="margin-top:14px">${body}</div>
@@ -784,7 +1122,7 @@ function renderSearch(anim) {
   appEl.innerHTML = `<div class="page nobar ${anim}">
     <div class="navbar"><div class="side"></div><div class="mid">Search</div><div class="side r"></div></div>
     <div class="ltitle"><h1>Search</h1></div>
-    <label class="search">${g("search")}<input id="q" type="search" placeholder="Tasks, notes, lists" value="${esc(S.q)}" autocomplete="off" enterkeyhint="search"></label>
+    <label class="search">${g("search")}<input id="q" type="search" placeholder="Tasks, habits, notes, lists" value="${esc(S.q)}" autocomplete="off" enterkeyhint="search"></label>
     <div id="results"></div></div>${tabbar()}`;
   bindCommon();
   const q = $("#q");
@@ -794,14 +1132,15 @@ function renderSearch(anim) {
     const hit = (txt) => (txt || "").toLowerCase().includes(s);
     const ls = D.lists.filter((l) => hit(l.name)), its = D.items.filter((i) => hit(i.title) || hit(i.notes) || hit(i.section));
     const ts = D.templates.filter((t) => hit(t.name) || t.items.some((x) => hit(x.title)));
+    const hb = (D.habits || []).filter((h) => hit(h.name));
     const mark = (t) => esc(t).replace(new RegExp(esc(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"), (m) => `<mark>${m}</mark>`);
-    out.innerHTML = (ls.length ? `<div class="sh sm"><h2>Lists</h2></div><div class="group ic">${ls.map((l) => `<button type="button" class="cell" data-go="#/list/${l.id}">${lic(l.icon, l.color)}<span class="grow">${mark(l.name)}</span>${g("chevR", "chev")}</button>`).join("")}</div>` : "")
+    out.innerHTML = (hb.length ? `<div class="sh sm"><h2>Habits</h2></div><div class="group ic">${hb.map((h) => `<button type="button" class="cell" data-hopen="${h.id}">${lic(h.icon, h.color)}<span class="grow">${mark(h.name)}<div class="sub">${esc(schedText(h))}${h.archived ? " · archived" : ""}</div></span>${g("chevR", "chev")}</button>`).join("")}</div>` : "") + (ls.length ? `<div class="sh sm"><h2>Lists</h2></div><div class="group ic">${ls.map((l) => `<button type="button" class="cell" data-go="#/list/${l.id}">${lic(l.icon, l.color)}<span class="grow">${mark(l.name)}</span>${g("chevR", "chev")}</button>`).join("")}</div>` : "")
       + (its.length ? `<div class="sh sm"><h2>Tasks · ${its.length}</h2></div><div class="tasks">${its.slice(0, 80).map((i) => taskRow(i, { src: true })).join("")}</div>` : "")
       + (ts.length ? `<div class="sh sm"><h2>Templates</h2></div><div class="group ic">${ts.map((t) => `<button type="button" class="cell" data-tplq="${t.id}">${lic(t.icon, t.color)}<span class="grow">${mark(t.name)}</span>${g("chevR", "chev")}</button>`).join("")}</div>` : "")
       || `<div class="empty">${lic("search", "#8e8e93")}<b>No results for “${esc(S.q)}”</b></div>`;
     $$("[data-go]", out).forEach((b) => b.onclick = () => go(b.dataset.go));
     $$("[data-tplq]", out).forEach((b) => b.onclick = () => editTemplate(tplById(b.dataset.tplq)));
-    bindRows();
+    bindRows(); bindHabits(out);
   };
   q.oninput = run; run();
   setTimeout(() => q.focus(), 60);
@@ -826,10 +1165,16 @@ function taskRow(it, o = {}) {
       <div class="body" data-act="open"><div class="title">${esc(it.title)}</div>${meta.length ? `<div class="meta">${meta.join("")}</div>` : ""}</div>
       ${it.qty > 1 ? `<span class="qty">×${it.qty}</span>` : ""}
       ${editing ? `<span class="handle" aria-label="Drag to reorder">${g("grip")}</span>` :
-        `<button type="button" class="star ${it.starred ? "on" : ""}" data-act="star" aria-pressed="${!!it.starred}" aria-label="Star">${g(it.starred ? "starFill" : "star")}</button>`}
+        `<button type="button" class="star ${it.starred ? "on" : ""} ${S.pop === `star:${it.id}` ? "pop" : ""}" data-act="star" aria-pressed="${!!it.starred}" aria-label="Star">${g(it.starred ? "starFill" : "star")}</button>`}
     </div></div>`;
 }
 function bindRows() { $$(".rw").forEach(bindRow); }
+function collapse(el, cb) { // the row folds away before the list redraws
+  el.style.height = el.offsetHeight + "px"; void el.offsetHeight;
+  el.style.transition = "height .26s cubic-bezier(.2,.9,.3,1), opacity .2s ease-out, margin .26s cubic-bezier(.2,.9,.3,1), transform .26s";
+  el.style.height = "0px"; el.style.opacity = "0"; el.style.marginBottom = "-8px"; el.style.transform = "scale(.97)";
+  setTimeout(cb, 270);
+}
 function viewOpenCount() {
   const r = S.route;
   if (r.name === "day") return counts(myDayItems(r.day)).open;
@@ -846,12 +1191,14 @@ function bindRow(wrap) {
     if (!act || swiped) return;
     const a = act.dataset.act;
     if (a === "done") {
-      haptic(10); row.classList.toggle("done", !it.done); act.setAttribute("aria-checked", String(!it.done));
+      if (wrap.dataset.busy) return; wrap.dataset.busy = 1;
+      const nowDone = !it.done;
+      haptic(nowDone ? [8, 24, 8] : 6); row.classList.toggle("done", nowDone); row.classList.add(nowDone ? "completing" : "reopening"); act.setAttribute("aria-checked", String(nowDone));
       const before = viewOpenCount();
-      setDone(it, !it.done);
-      if (it.done && before === 1 && viewOpenCount() === 0) setTimeout(confetti, 180);
-      setTimeout(() => render(""), 380);
-    } else if (a === "star") { haptic(6); it.starred = !it.starred; save(); render(""); }
+      setDone(it, nowDone); S.newIds.add(it.id);
+      if (it.done && before === 1 && viewOpenCount() === 0) setTimeout(confetti, 260);
+      reduceMotion.matches ? render("") : setTimeout(() => collapse(wrap, () => render("")), nowDone ? 460 : 200);
+    } else if (a === "star") { haptic(6); it.starred = !it.starred; save(); if (it.starred) S.pop = `star:${it.id}`; render(""); }
     else if (a === "open") editItem(it);
     else if (a === "del") deleteItem(it);
   });
@@ -1344,33 +1691,38 @@ function switchProfile(id) {
 }
 
 // ================= welcome =================
+const WELCOME_WALLS = ["tahoe-dawn", "big-sur-color-day", "sonoma-horizon", "monterey-light", "tahoe-dusk"];
 function renderWelcome() {
-  const m = Store.meta();
-  appEl.innerHTML = `<div class="welcome wall" style="${wallStyle(autoWall(), false)}"><div class="in fade-in">
+  const m = Store.meta(), first = autoWall();
+  const walls = [first, ...WELCOME_WALLS.filter((k) => k !== first)].slice(0, 4);
+  appEl.innerHTML = `<div class="welcome">
+    <div class="bg" aria-hidden="true">${walls.map((k, i) => `<i style="background-image:url(img/${k}.webp);--i:${i}"></i>`).join("")}</div>
+    <div class="orbs" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="in">
     <img class="logo" src="icons/icon-192.png" alt="">
     <h1>${S.adding ? "New Profile" : "Daily To Do"}</h1>
-    <p>My Day, lists for anything, templates for your routines, and rules that reset lists for you.</p>
+    <p>My Day, habits you keep, lists for anything, and templates for your routines.</p>
     <form id="wForm" novalidate>
       <div class="field glass"><input id="wName" placeholder="Your name" autocomplete="given-name" maxlength="40" aria-label="Your name"></div>
-      <div class="field glass"><label><span style="flex:1">Start with examples<br><small style="opacity:.8">A few lists, plus Toronto and Barrie Saturday templates</small></span><span class="switch"><input type="checkbox" id="wSeed" checked><span></span></span></label></div>
       <button class="btn" type="submit">Get Started</button>
       ${m.list.length ? `<button type="button" class="link" id="wBack">Back to ${esc((m.list.find((x) => x.id === m.active) || m.list[0]).name)}</button>` : `<label class="link">Restore from a backup file<input type="file" id="wImport" accept="application/json,.json" hidden></label>`}
     </form></div></div>`;
-  $("#wForm").onsubmit = (e) => { e.preventDefault(); const n = $("#wName").value.trim(); if (!n) { $("#wName").focus(); toast("What should we call you?"); return; } createProfile(n, $("#wSeed").checked); };
+  $("#wForm").onsubmit = (e) => { e.preventDefault(); const n = $("#wName").value.trim(); if (!n) { const f = $(".field", appEl); f.classList.remove("shake"); void f.offsetWidth; f.classList.add("shake"); $("#wName").focus(); toast("What should we call you?"); return; } createProfile(n); };
   $("#wBack") && ($("#wBack").onclick = () => switchProfile(m.active || m.list[0].id));
   $("#wImport") && ($("#wImport").onchange = (e) => {
     const f = e.target.files[0]; if (!f) return;
     const r = new FileReader();
-    r.onload = () => { try { const x = JSON.parse(r.result); if (!validBackup(x)) throw 0; const id = createProfile(x.profile.name || "Me", false); D = migrate({ ...blankData(x.profile.name), ...x }); delete D.app; Store.write(id, D); render(); toast("Backup restored"); } catch { toast("That file isn't a Daily To Do backup."); } };
+    r.onload = () => { try { const x = JSON.parse(r.result); if (!validBackup(x)) throw 0; const id = createProfile(x.profile.name || "Me"); D = migrate({ ...blankData(x.profile.name), ...x }); delete D.app; Store.write(id, D); render(); toast("Backup restored"); } catch { toast("That file isn't a Daily To Do backup."); } };
     r.readAsText(f);
   });
 }
-function createProfile(name, withSeed) {
-  const id = uid(); D = blankData(name); PID = id; if (withSeed) seed(D);
+function createProfile(name) {
+  const id = uid(); D = blankData(name); PID = id;
   Store.write(id, D); const m = Store.meta(); m.list.push({ id, name }); m.active = id; Store.setMeta(m);
   S.adding = false;
   try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch { /* unsupported */ }
-  if (location.hash && location.hash !== "#/") go("#/", true); else { S.route = { name: "lists" }; render(); }
+  const home = `#/day/${today()}`; // land on My Day, where the first task and habit go
+  if (location.hash !== home) go(home, true); else { S.route = parseHash(); render("fade-in"); }
   return id;
 }
 

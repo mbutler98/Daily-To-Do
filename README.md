@@ -1,6 +1,6 @@
 # Daily To Do
 
-My Day, lists for anything, templates for your routines, and rules that reset lists for you. iPhone-style design with macOS wallpaper themes. It's a plain web page hosted on GitHub Pages: no server to run.
+My Day, habits you keep, lists for anything, templates for your routines, and rules that reset lists for you. iPhone-style design with macOS wallpaper themes. It's a plain web page hosted on GitHub Pages: no server to run.
 
 **Open it:** https://mbutler98.github.io/Daily-To-Do/
 
@@ -15,6 +15,7 @@ On iPhone, open it in Safari, tap **Share → Add to Home Screen**. It opens ful
   - On days with templates, it asks “It's Saturday. Which plan?”
   - The 🔥 pill is your streak: the number of days in a row you finished something.
   - **⋯** opens **Suggestions** (overdue, due-soon and starred items from your lists, added with one tap), **Pick One for Me**, templates, Move Unfinished to Tomorrow, Change Theme and Print.
+- **Habits:** gym, reading, coding, meals, chores, anything you repeat (see below).
 - **Lists:**
   - Smart lists: **My Day**, **Starred**, **Planned** and **All**.
   - Your lists show as picture cards or compact rows (the button at the top right switches).
@@ -24,6 +25,18 @@ On iPhone, open it in Safari, tap **Share → Add to Home Screen**. It opens ful
 - **Search:** every task, note, list and template.
 
 Tap your name on the Lists tab for **Profile**: a weekly chart of what you finished, your streaks, light/dark mode, the My Day theme, backups and more than one profile on the same device.
+
+## Habits
+
+Each habit is a ring. Tap it when you've done it; your habits for the day also sit under the picture on **My Day**.
+
+- **Three kinds of goal:** done or not (Gym, Chores), a count (Eat 3 meals, 8 glasses of water: each tap adds one) or an amount with a unit (Read 20 pages, Code 30 min: tap for +5, +10 or the full goal).
+- **How often:** every day, on chosen days (Code on weekdays), or a number of times a week on any days (Gym 4× a week).
+- **Time of day:** Morning, Afternoon, Evening or Any Time groups the Habits tab.
+- **This week:** tap a day under a habit to fill it in later.
+- **Press and hold a ring** for details: current and best streak, a strength score, a 20-week grid, editing any past day, skipping a day, archiving.
+- **Skips** are rest days: they don't break a streak. **Strength** rises with each check-in and eases down after a miss, so one off day doesn't erase your progress.
+- Finishing every habit for the day sets off confetti.
 
 ## Lists for anything
 
