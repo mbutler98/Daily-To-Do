@@ -3,7 +3,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-STATIC = Path(__file__).resolve().parent.parent / "static"
+STATIC = Path(__file__).resolve().parent.parent / "icons"
 
 
 def icon(size):
