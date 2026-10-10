@@ -1,45 +1,89 @@
 # Daily To Do
 
-Day plans, shopping lists, any other list, and reusable templates, with an iPhone-style design built from macOS wallpaper cards. It's a plain web page hosted on GitHub Pages: open the link on your phone or laptop, no server to run.
+My Day, lists for anything, templates for your routines, and rules that reset lists for you. iPhone-style design with macOS wallpaper themes. It's a plain web page hosted on GitHub Pages: no server to run.
 
 **Open it:** https://mbutler98.github.io/Daily-To-Do/
 
-On iPhone, open it in Safari, tap **Share → Add to Home Screen**. It then opens full screen like an app and works offline.
+On iPhone, open it in Safari, tap **Share → Add to Home Screen**. It opens full screen like an app and works offline.
 
-## What it does
+## Tabs
 
-- **Lists home:** a greeting, a big **Today** card (its picture follows the time of day: Tahoe at dawn, day, dusk and night), **Starred** and **Planned** tiles, your lists as picture cards with progress bars, and your templates.
-- **Today / any day:** each day has its own plan. Use ‹ › on the picture (or swipe it), or tap the day name to pick a date.
-  - Unfinished tasks from earlier days show under **From earlier**, with **Move to today**.
-  - List items due that day show under **Due from your lists**.
-- **Any kind of list:** pick a name, emoji and picture, and choose the kind:
-  - **To-dos:** stars, notes, optional due dates and times.
-  - **Shopping:** type `2 milk` or `milk x2` for a quantity. Items sort themselves by aisle (Produce, Dairy & Eggs, Meat & Fish…). Ticked items go to **In the cart**, and **Put Everything Back on the List** makes the list reusable next week. Adding something already on the list brings it back instead of duplicating it.
-- **Tasks and items:**
-  - Tap the circle to tick it off. Tap the row to edit everything, including moving it to another list or day.
-  - Swipe left to delete (with Undo). Swipe right to move a day task to the next day, or to make a list item due today.
-  - **Edit** lets you drag rows into your own order.
-  - **Share as Text** sends a list to Messages or WhatsApp.
-- **Templates:**
-  - A **day template** (*Saturday in Toronto*, *Saturday in Barrie*) is offered on the weekdays you pick. Today asks **"It's Saturday. Which plan?"** and you tap the one that fits. Nothing is added until you choose, and once one is added the other stops being offered.
-  - A **list template** (*Weekly staples*) fills a list, such as Groceries, in one tap.
-  - **⋯ → Save as Template** turns any day or list into a template.
-- **Profile:** your name, light/dark/automatic, Today's picture, backups, and more than one profile on the same device.
+- **My Day:** today's plan, under a picture that follows the time of day.
+  - ‹ › (or swipe the picture) moves between days. Tap the day name to pick a date.
+  - **Earlier** shows unfinished tasks from past days, with **Move to Today**.
+  - **Due from your lists** shows list items due that day.
+  - On days with templates, it asks “It's Saturday. Which plan?”
+  - The 🔥 pill is your streak: the number of days in a row you finished something.
+  - **⋯** opens **Suggestions** (overdue, due-soon and starred items from your lists, added with one tap), **Pick One for Me**, templates, Move Unfinished to Tomorrow, Change Theme and Print.
+- **Lists:**
+  - Smart lists: **My Day**, **Starred**, **Planned** and **All**.
+  - Your lists show as picture cards or compact rows (the button at the top right switches).
+- **Templates:** reusable lists.
+  - A My Day template is offered on the weekdays you pick, like a Toronto Saturday and a Barrie Saturday.
+  - A list template fills a list in one tap, or starts a new list from it.
+- **Search:** every task, note, list and template.
+
+Tap your name on the Lists tab for **Profile**: a weekly chart of what you finished, your streaks, light/dark mode, the My Day theme, backups and more than one profile on the same device.
+
+## Lists for anything
+
+Every list is the same kind of list. You choose the extras in **Edit List** or the **⋯** menu:
+
+- **Look:** a colour, an icon (36 glyphs) and a theme picture.
+- **Quantities:** type `2 eggs` or `eggs x2`. Adding something already on the list brings it back instead of duplicating it.
+- **Group by:** none, sections (aisles, rooms, people, anything) or due date.
+- **Sort:** manual (drag in **Edit**), importance, due date, alphabetically or creation date.
+- **Show or hide completed items.**
+- **Other actions:** Duplicate, Uncheck All, Save as Template, Send a Copy (share sheet), Print and Delete.
+
+## Rules
+
+**⋯ → Rules** on any list. Pick **when** (daily; weekly on chosen days; or monthly on a date) and **what happens**:
+
+- **Start fresh:** uncheck everything, e.g. “every Saturday, reset Groceries”.
+- **Remove completed:** delete ticked-off items.
+- **Add from a template:** e.g. “every Friday, add Weekly staples”.
+- **Send to My Day:** add the list's unfinished items to My Day.
+
+Rules run the first time you open the app on that day. **Run Now** tries one straight away. A list with a rule shows it on its picture.
+
+## Adding tasks
+
+Type naturally:
+
+| Type | What happens |
+| --- | --- |
+| `Gym tomorrow 7am` | due tomorrow at 7:00 AM |
+| `Call mom friday 5pm !` | Friday at 5:00 PM, starred |
+| `Water plants every day` | repeats daily |
+| `Bins every monday` | repeats weekly, starting Monday |
+| `Read tonight` | today at 7:00 PM |
+
+What it understood shows as chips under the text box. Tap a chip to keep that part as plain text. The buttons under the text box set My Day, the due date, the time, the repeat and the star by hand.
+
+**Repeating tasks:** ticking one off creates the next one.
+
+**Gestures:**
+
+- Swipe left on a task to delete it, with Undo.
+- Swipe right to move a My Day task to tomorrow, or to add a list item to My Day.
+- Tap a task for its details: My Day, due date, time, repeat, quantity, section, list, note, duplicate and delete.
+- Finishing the last task in a list sets off confetti.
 
 ## Where your lists are saved
 
-Everything is saved in the browser on each device (localStorage); nothing is sent to a server. That means:
+Everything is saved in the browser on each device; nothing is sent to a server.
 
-- Your phone and laptop each keep their own copy. To move lists across, use **Profile → Download Backup** on one device and **Restore From Backup** on the other.
-- On iPhone, add the app to the Home Screen. Safari can clear storage for websites you haven't visited in a while, but not for Home Screen apps.
-- Download a backup now and then.
+- Your phone and laptop each keep their own copy. To move lists across, use **Profile → Download Backup** on one and **Restore From Backup** on the other.
+- On iPhone, use the Home Screen app: Safari can clear storage for websites you haven't visited in a while, but not for Home Screen apps.
+- Data from the earlier version is upgraded automatically.
 
 ## Files
 
 - `index.html`, `app.css`, `app.js`: the whole app (no build step)
-- `sw.js`: lets it work offline once opened
+- `sw.js`: offline support
 - `img/`: macOS wallpapers, resized (1600px for headers, 480px `-sm` for cards)
-- `icons/`, `manifest.webmanifest`: the home-screen icon and app details
+- `icons/`, `manifest.webmanifest`: Home Screen icon and app details
 - `tools/make_icons.py`: redraws the icons
 
-To try changes locally: `python -m http.server` in this folder, then open http://localhost:8000.
+To try changes locally, run `python -m http.server` in this folder, then open http://localhost:8000.
