@@ -1,0 +1,5 @@
+# your lists, logins and keys stay on your laptop
+data/
+.env
+__pycache__/
+*.pyc
