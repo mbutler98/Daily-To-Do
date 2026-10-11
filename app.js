@@ -1724,8 +1724,8 @@ function renderWelcome() {
   const m = Store.meta(), first = autoWall();
   const walls = [first, ...WELCOME_WALLS.filter((k) => k !== first)].slice(0, 4);
   appEl.innerHTML = `<div class="welcome">
-    <div class="bg" aria-hidden="true">${walls.map((k, i) => `<i style="background-image:url(img/${k}.webp);--i:${i}"></i>`).join("")}</div>
-    <div class="orbs" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="bg" id="wBg" aria-hidden="true">${walls.map((k, i) => `<i style="background-image:url(img/${k}.webp);--i:${i}"></i>`).join("")}</div>
+    <div class="orbs" id="wOrbs" aria-hidden="true"><i></i><i></i><i></i></div>
     <div class="in">
     <img class="logo" src="icons/icon-192.png" alt="">
     <h1>${S.adding ? "New Profile" : "Daily To Do"}</h1>
@@ -1735,6 +1735,9 @@ function renderWelcome() {
       <button class="btn" type="submit">Get Started</button>
       ${m.list.length ? `<button type="button" class="link" id="wBack">Back to ${esc((m.list.find((x) => x.id === m.active) || m.list[0]).name)}</button>` : `<label class="link">Restore from a backup file<input type="file" id="wImport" accept="application/json,.json" hidden></label>`}
     </form></div></div>`;
+  // start the crossfade only once every picture is decoded, so nothing pops in half-drawn
+  Promise.all(walls.map((k) => { const im = new Image(); im.src = `img/${k}.webp`; IMG_KEEP.set(k, im); return im.decode ? im.decode().catch(() => {}) : Promise.resolve(); }))
+    .then(() => { const bg = $("#wBg"), orbs = $("#wOrbs"); if (bg) bg.classList.add("ready"); if (orbs) orbs.classList.add("ready"); });
   $("#wForm").onsubmit = (e) => { e.preventDefault(); const n = $("#wName").value.trim(); if (!n) { const f = $(".field", appEl); f.classList.remove("shake"); void f.offsetWidth; f.classList.add("shake"); $("#wName").focus(); toast("What should we call you?"); return; } createProfile(n); };
   $("#wBack") && ($("#wBack").onclick = () => switchProfile(m.active || m.list[0].id));
   $("#wImport") && ($("#wImport").onchange = (e) => {

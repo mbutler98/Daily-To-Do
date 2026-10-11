@@ -375,39 +375,36 @@ mark { background: color-mix(in srgb, var(--yellow) 45%, transparent); color: in
 .statrow b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; }
 .statrow span { font-size: 12px; color: var(--label-2); }
 
-/* welcome: a slow slideshow of wallpapers with drifting light */
+/* welcome: wallpapers crossfade slowly. Only opacity and transform are animated, with no blur, blend modes or
+   frosted glass over moving layers, because iOS repaints those unevenly and they flicker. */
 .welcome { min-height: 100dvh; display: flex; flex-direction: column; justify-content: flex-end; color: #fff; position: relative; isolation: isolate; overflow: hidden; background: #1c2233; }
 .welcome::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(0,0,0,0) 15%, rgba(0,0,0,.7)); }
 .welcome .bg { position: absolute; inset: 0; z-index: -3; }
-.welcome .bg i { position: absolute; inset: -5%; background-size: cover; background-position: center; opacity: 0; will-change: opacity, transform;
-  animation: wslide 32s linear infinite; animation-delay: calc(var(--i) * 8s - 1.4s); }
-@keyframes wslide {
-  0% { opacity: 0; transform: scale(1.04) translate(0, 0); }
-  4% { opacity: 1; }
-  25% { opacity: 1; }
-  31% { opacity: 0; transform: scale(1.16) translate(-2%, -1.5%); }
-  100% { opacity: 0; transform: scale(1.16) translate(-2%, -1.5%); }
-}
-.welcome .orbs { position: absolute; inset: 0; z-index: -2; pointer-events: none; }
-.welcome .orbs i { position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; filter: blur(70px); opacity: .5; mix-blend-mode: soft-light; will-change: transform; }
-.welcome .orbs i:nth-child(1) { background: #ff9f6b; left: -30vmax; top: -25vmax; animation: drift1 19s ease-in-out infinite alternate; }
-.welcome .orbs i:nth-child(2) { background: #6bb6ff; right: -35vmax; top: 10vmax; animation: drift2 23s ease-in-out infinite alternate; }
-.welcome .orbs i:nth-child(3) { background: #c56bff; left: -10vmax; bottom: -40vmax; animation: drift3 27s ease-in-out infinite alternate; }
-@keyframes drift1 { to { transform: translate(28vmax, 22vmax) scale(1.2); } }
-@keyframes drift2 { to { transform: translate(-30vmax, 18vmax) scale(.85); } }
-@keyframes drift3 { to { transform: translate(24vmax, -26vmax) scale(1.15); } }
+.welcome .bg i { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0; }
+.welcome .bg i:first-child { opacity: 1; }
+.welcome .bg.ready i { animation: wslide 40s linear infinite; animation-delay: calc(var(--i) * 10s - 2s); }
+@keyframes wslide { 0% { opacity: 0; } 6% { opacity: 1; } 25% { opacity: 1; } 31% { opacity: 0; } 100% { opacity: 0; } }
+.welcome .orbs { position: absolute; inset: 0; z-index: -2; pointer-events: none; overflow: hidden; }
+.welcome .orbs i { position: absolute; width: 90vmax; height: 90vmax; border-radius: 50%; opacity: .32; }
+.welcome .orbs i:nth-child(1) { left: -45vmax; top: -45vmax; background: radial-gradient(closest-side, #ffa97a, transparent); }
+.welcome .orbs i:nth-child(2) { right: -50vmax; top: 0; background: radial-gradient(closest-side, #6bb6ff, transparent); }
+.welcome .orbs i:nth-child(3) { left: -25vmax; bottom: -55vmax; background: radial-gradient(closest-side, #c56bff, transparent); }
+.welcome .orbs.ready i:nth-child(1) { animation: drift1 24s ease-in-out infinite alternate; }
+.welcome .orbs.ready i:nth-child(2) { animation: drift2 30s ease-in-out infinite alternate; }
+.welcome .orbs.ready i:nth-child(3) { animation: drift3 36s ease-in-out infinite alternate; }
+@keyframes drift1 { to { transform: translate3d(30vmax, 24vmax, 0); } }
+@keyframes drift2 { to { transform: translate3d(-34vmax, 20vmax, 0); } }
+@keyframes drift3 { to { transform: translate3d(28vmax, -30vmax, 0); } }
 .welcome .in { max-width: 460px; width: 100%; margin: 0 auto; padding: 24px 20px calc(28px + env(safe-area-inset-bottom)); }
 .welcome .in > *, .welcome form > * { animation: rise .8s cubic-bezier(.2, .9, .3, 1) both; }
 .welcome .in > :nth-child(2) { animation-delay: .08s; } .welcome .in > :nth-child(3) { animation-delay: .16s; }
 .welcome form > :nth-child(1) { animation-delay: .26s; } .welcome form > :nth-child(2) { animation-delay: .34s; } .welcome form > :nth-child(3) { animation-delay: .42s; }
-@keyframes rise { from { opacity: 0; transform: translateY(24px); filter: blur(6px); } }
+@keyframes rise { from { opacity: 0; transform: translateY(24px); } }
 .welcome .logo { width: 72px; height: 72px; border-radius: 18px; box-shadow: 0 8px 24px rgba(0,0,0,.3); display: block; margin-bottom: 18px; }
-.welcome .in > .logo { animation: rise .8s cubic-bezier(.2, .9, .3, 1) both, bob 5s 1s ease-in-out infinite; }
-@keyframes bob { 50% { transform: translateY(-5px) rotate(-2deg); } }
 .welcome h1 { font-size: 38px; line-height: 1.08; margin: 0 0 8px; font-weight: 800; text-shadow: 0 2px 14px rgba(0,0,0,.3); }
 .welcome p { margin: 0 0 22px; font-size: 17px; opacity: .92; }
-.welcome .field { border-radius: 14px; padding: 0 16px; margin-bottom: 12px; transition: box-shadow .2s; }
-.welcome .field:focus-within { box-shadow: inset 0 .5px 0 rgba(255,255,255,.4), 0 0 0 2px rgba(255,255,255,.55); }
+.welcome .field, .welcome .field.glass { border-radius: 14px; padding: 0 16px; margin-bottom: 12px; transition: box-shadow .2s; background: rgba(20,24,38,.42); -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: inset 0 0 0 .5px rgba(255,255,255,.3); }
+.welcome .field:focus-within { box-shadow: inset 0 0 0 .5px rgba(255,255,255,.3), 0 0 0 2px rgba(255,255,255,.55); }
 .welcome .field.shake { animation: shake .45s cubic-bezier(.36, .07, .19, .97); }
 @keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
 .welcome .field input { width: 100%; min-height: 52px; color: #fff; font-size: 17px; }
@@ -488,7 +485,7 @@ mark { background: color-mix(in srgb, var(--yellow) 45%, transparent); color: in
   .navbar.scrolled, .tabbar, .addbtn, .menu, .actions .group { background: var(--elev); -webkit-backdrop-filter: none; backdrop-filter: none; }
   .glass, .icard .num { background: rgba(0,0,0,.55); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
-@media (prefers-reduced-motion: reduce) { .hero > .wimg, .welcome .bg i:not(:first-child), .welcome .orbs { animation: none !important; } .welcome .bg i:first-child { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .welcome .bg i, .welcome .orbs i { animation: none !important; } .welcome .bg i:first-child { opacity: 1; } }
 
 /* tablet & desktop: sidebar like To Do on the web */
 @media (min-width: 720px) { .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } .hs > * { width: 30%; } }
