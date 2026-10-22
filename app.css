@@ -624,3 +624,14 @@ mark { background: color-mix(in srgb, var(--yellow) 45%, transparent); color: in
 .heat .now { box-shadow: inset 0 0 0 1.5px var(--label-2); }
 .heat .sel { box-shadow: 0 0 0 2px var(--accent); position: relative; z-index: 1; }
 .heat .sk { background: repeating-linear-gradient(45deg, var(--fill-2) 0 2px, transparent 2px 4px); }
+
+/* Butler sync: calendar events from the vault on My Day, and the sync pill */
+.bt-evs { gap: 0; background: var(--card); border-radius: var(--r); overflow: hidden; box-shadow: var(--card-shadow); }
+.bt-ev { position: relative; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 14px; }
+.bt-ev + .bt-ev::before { content: ""; position: absolute; top: 0; left: 86px; right: 0; border-top: .5px solid var(--sep); }
+.bt-ev::after { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--indigo); }
+.bt-when { flex: 0 0 60px; font-size: 13px; font-weight: 600; color: var(--indigo); font-variant-numeric: tabular-nums; }
+.bt-ev .body { min-width: 0; flex: 1; }
+.bt-ev .title { font-size: 17px; letter-spacing: -.41px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bt-ev .meta { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 13px; color: var(--label-2); margin-top: 1px; }
+.bt-pill { font-size: 13px; }

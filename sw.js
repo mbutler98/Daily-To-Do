@@ -1,8 +1,8 @@
 /* Offline support: the app works without a connection once it has been opened.
    Pages and code: network first (so updates show up), falling back to the saved copy.
    Pictures: saved the first time they're shown, then served from the device. */
-const VERSION = "dtd-v4-3";
-const SHELL = ["./", "index.html", "app.css", "app.js", "manifest.webmanifest", "icons/icon-192.png", "icons/apple-touch-icon.png"];
+const VERSION = "dtd-v5-butler";
+const SHELL = ["./", "index.html", "app.css", "app.js", "butler.js", "manifest.webmanifest", "icons/icon-192.png", "icons/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

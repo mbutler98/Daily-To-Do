@@ -6,6 +6,17 @@ My Day, habits you keep, lists for anything, templates for your routines, and ru
 
 On iPhone, open it in Safari, tap **Share → Add to Home Screen**. It opens full screen like an app and works offline.
 
+## Connected to your vault (optional)
+
+Daily To Do can sync with Michael's Obsidian vault through a small private API on the Mac mini (`~/Code/butler-tasks/server.py`), reachable only over Tailscale. The vault is the same list Ceres, Hermes, Paperclip and Claude write to, so it all stays in step.
+
+- **Connect once per device:** run `~/Code/butler-tasks/setup.sh` on the Mac; it copies a connect link. Open it on the phone (or paste it in **Profile → Your Mac → Connect**). The link's key stays in the address fragment, so it never reaches GitHub.
+- **What syncs:** dated to-dos on **My Day**, undated ones in **Inbox**, things you're waiting on in **Waiting On**, every habit and ring tap, and vault calendar events (shown on My Day, read-only here). Anything you add to My Day, Inbox or Waiting On goes to the vault.
+- **Offline:** changes wait in an outbox (kept across restarts) and go when the Mac is reachable. A small pill on My Day shows how many are waiting.
+- **Deleting** a synced to-do cancels it in the vault (the note is kept, never deleted).
+- **Disconnect** from Profile; your lists stay on the device.
+- Code: `butler.js` (loaded after `app.js`; it wraps `save` and `render` and doesn't change the app's own logic).
+
 ## Tabs
 
 - **My Day:** today's plan, under a picture that follows the time of day.
